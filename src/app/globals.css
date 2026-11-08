@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/*
+ * ROOMORA Design-Tokens
+ * Die fünf Markenfarben sind verbindlich. Alle Komponenten verwenden
+ * ausschließlich diese Tokens (z. B. bg-cream, text-charcoal).
+ */
+@theme {
+  --color-cream: #f2ede5;
+  --color-sand: #d8c8b5;
+  --color-taupe: #a58d71;
+  --color-sage: #777c6b;
+  --color-charcoal: #35352f;
+
+  /* Abgeleitete Töne für Flächen, Linien und gedämpften Text */
+  --color-paper: #faf8f4;
+  --color-line: #e4dace;
+  --color-muted: #5a5a51;
+  --color-taupe-deep: #7d6850;
+  --color-sage-deep: #5c6152;
+  --color-error: #9a3b2e;
+
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+
+  --radius-card: 1.25rem;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-charcoal);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-cream);
+    color: var(--color-charcoal);
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-charcoal);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background-color: var(--color-sand);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
