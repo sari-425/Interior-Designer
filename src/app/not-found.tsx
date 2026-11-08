@@ -11,7 +11,7 @@ export default function NotFound() {
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <ButtonLink href="/">Zur Startseite</ButtonLink>
           <ButtonLink href="/gestalten" variant="secondary">
-            Raum gestalten
+            Wohnzimmer planen
           </ButtonLink>
         </div>
       </Container>

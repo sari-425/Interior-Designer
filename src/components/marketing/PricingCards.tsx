@@ -15,12 +15,12 @@ export function PricingCards() {
           >
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-2xl">{pkg.name}</h3>
-              {pkg.highlighted && <Badge tone="info">Beliebt</Badge>}
+              <Badge tone={pkg.highlighted ? "info" : "neutral"}>Geplant</Badge>
             </div>
             <p className="mt-1 text-muted">{pkg.tagline}</p>
             <p className="mt-6 font-display text-4xl">
               {formatEuro(pkg.priceCents)}
-              <span className="ml-1 align-middle font-sans text-sm text-muted">einmalig</span>
+              <span className="ml-1 align-middle font-sans text-sm text-muted">einmalig, geplant</span>
             </p>
             <ul className="mt-6 flex-1 space-y-3">
               {pkg.features.map((f) => (
@@ -33,14 +33,15 @@ export function PricingCards() {
               ))}
             </ul>
             <ButtonLink href="/gestalten" variant={pkg.highlighted ? "primary" : "secondary"} className="mt-8">
-              Kostenlos ausprobieren
+              Planung kostenlos ausprobieren
             </ButtonLink>
+            <p className="mt-3 text-center text-sm text-muted">Paket noch nicht buchbar</p>
           </article>
         ))}
       </div>
       <p className="mt-6 text-sm leading-relaxed text-muted">
-        Vorläufige Preise inkl. 19 % USt. Leistungsumfang und Preise können sich bis zum Start noch ändern. Pakete
-        sind derzeit noch nicht buchbar.
+        Vorläufige Preise inkl. 19 % USt. Die Designpakete starten zusammen mit der KI-Gestaltung und sind derzeit
+        noch nicht buchbar. Leistungsumfang und Preise können sich bis zum Start noch ändern.
       </p>
     </div>
   );

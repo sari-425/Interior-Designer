@@ -37,7 +37,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden md:block">
-          <ButtonLink href="/gestalten">Jetzt Raum gestalten</ButtonLink>
+          <ButtonLink href="/gestalten">Wohnzimmer planen</ButtonLink>
         </div>
 
         <button
@@ -69,7 +69,7 @@ export function SiteHeader() {
               ))}
             </nav>
             <ButtonLink href="/gestalten" size="lg" className="mt-3 w-full" onClick={close}>
-              Jetzt Raum gestalten
+              Wohnzimmer planen
             </ButtonLink>
           </Container>
         </div>

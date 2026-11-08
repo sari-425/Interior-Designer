@@ -16,12 +16,12 @@ const fraunces = Fraunces({
 
 export const metadata: Metadata = {
   title: {
-    default: "ROOMORA – Dein Raum. Dein Stil. Dein Zuhause.",
-    template: "%s · ROOMORA",
+    default: "DesignBySari – Dein Zuhause. Dein Budget. Dein Design.",
+    template: "%s · DesignBySari",
   },
   description:
-    "Lade ein Foto deines Zimmers hoch, wähle Stil und Budget und entdecke, wie dein Raum neu aussehen kann. Raumgestaltung mit KI für Deutschland.",
-  applicationName: "ROOMORA",
+    "Lade ein Foto deines Wohnzimmers hoch, wähle Stil, Farben und Budget und lege fest, welche Möbel bleiben. Wohnzimmer-Planung mit KI für Deutschland, derzeit als Vorschauversion.",
+  applicationName: "DesignBySari",
 };
 
 export const viewport: Viewport = {

@@ -82,9 +82,9 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
 
   return (
     <div>
-      <h2 className="text-3xl">Lade ein Foto deines Raums hoch</h2>
+      <h2 className="text-3xl">Lade ein Foto deines Wohnzimmers hoch</h2>
       <p className="mt-3 max-w-2xl text-muted">
-        Am besten bei Tageslicht, aus einer Ecke fotografiert, sodass möglichst viel vom Raum zu sehen ist.
+        Am besten bei Tageslicht, aus einer Ecke fotografiert, sodass möglichst viel vom Wohnzimmer zu sehen ist.
       </p>
 
       <input
@@ -102,7 +102,7 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
           <div className="overflow-hidden rounded-[var(--radius-card)] bg-sand">
             {/* Lokale Vorschau aus dem Browser-Speicher, daher kein next/image */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={photo.url} alt="Vorschau deines hochgeladenen Raumfotos" className="aspect-[4/3] w-full object-cover" />
+            <img src={photo.url} alt="Vorschau deines Wohnzimmerfotos" className="aspect-[4/3] w-full object-cover" />
           </div>
           <div className="rounded-2xl border border-line bg-paper p-5">
             <p className="font-medium break-all">{photo.name}</p>
@@ -159,10 +159,10 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
           </p>
         </div>
         <div className="rounded-2xl bg-sand/40 p-5 text-[0.95rem] leading-relaxed">
-          <p className="font-semibold">So arbeitet die KI</p>
+          <p className="font-semibold">So wird die KI arbeiten</p>
           <p className="mt-1 text-muted">
-            Die KI entwirft eine neue Einrichtung auf Basis deines Fotos. Bitte achte darauf, dass keine Personen
-            oder privaten Dokumente zu sehen sind.
+            Sobald die KI-Gestaltung bereit ist, entwirft sie eine neue Einrichtung auf Basis deines Fotos. Achte
+            schon jetzt darauf, dass keine Personen oder privaten Dokumente zu sehen sind.
           </p>
         </div>
       </div>

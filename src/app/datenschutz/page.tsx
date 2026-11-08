@@ -12,7 +12,7 @@ export default function PrivacyPage() {
       <h2>2. Aktueller Stand dieser Vorschauversion</h2>
       <p>
         In der aktuellen Vorschauversion werden hochgeladene Fotos ausschließlich lokal in deinem Browser angezeigt.
-        Sie werden nicht an ROOMORA oder Dritte übertragen und nicht gespeichert. Es werden keine Cookies zu
+        Sie werden nicht an DesignBySari oder Dritte übertragen und nicht gespeichert. Es werden keine Cookies zu
         Analyse- oder Werbezwecken gesetzt. Schriftarten werden von unserem eigenen Server geladen.
       </p>
 
