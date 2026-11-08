@@ -10,7 +10,8 @@ Datum: 2026-11-08 · Status: angenommen
 - **Möbel:** Statt getrennter Listen „Möbelwünsche“ und „Raumelemente“ gibt es eine Liste mit drei Zuständen je Möbelstück (Nicht vorhanden, Behalten, Ersetzen). So kann ein Möbelstück nie gleichzeitig behalten und ersetzt werden. Das Schema prüft es trotzdem zusätzlich.
 - **Raum und Oberflächen** aus Phase 1 bleiben erhalten (Bodenbelag, Wandfarbe, Decke, Einbauten, Heizkörper), jetzt mit drei Zuständen: Egal, Behalten, Darf sich ändern.
 - **Anzahl Designvarianten** (1 bis 4) aus Phase 1 bleibt erhalten und steht im Schritt „Raum“. Keine bestehende Funktion wurde entfernt; einzige bewusste Ausnahme ist die Raumtyp-Auswahl, weil der Start ausschließlich Wohnzimmer umfasst.
-- **Icon:** `src/app/icon.svg` zeigt die Marke im Browser-Tab. Die alte Standard-Datei `favicon.ico` von Next.js bleibt vorerst liegen, weil Dateien nur nach Freigabe gelöscht werden.
+- **Icon:** `src/app/icon.svg` zeigt die Marke im Browser-Tab. Die alte Standard-Datei `src/app/favicon.ico` (Next.js-Logo) bleibt auf Wunsch liegen. Next.js liefert beide Icons aus; Browser ohne SVG-Unterstützung für Icons (z. B. Safari) und Lesezeichen/Suchmaschinen über `/favicon.ico` zeigen weiterhin das alte Logo. Vorschlag: Inhalt von `favicon.ico` nach Freigabe durch eine DesignBySari-Version ersetzen.
+- **Vorschau ehrlich kennzeichnen:** Solange die KI nicht eingerichtet ist, sprechen Texte und Buttons von „planen“ statt „gestalten“, KI-Schritte und Designpakete sind als „In Vorbereitung“ bzw. „Geplant“ markiert.
 - **Kein Absenden:** Ohne Datenbank und KI gibt es nichts, wohin das Projekt geschickt werden könnte. Die Zusammenfassung sagt das offen, statt eine Verarbeitung vorzutäuschen.
 
 ## Vorbereitet, nicht aktiv

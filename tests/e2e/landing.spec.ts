@@ -7,9 +7,25 @@ test("Startseite zeigt Marke, Claim und führt zur Gestaltung", async ({ page })
   await expect(page.getByText("Beispiel · Illustration").first()).toBeVisible();
   await expect(page.getByText("9,90 €").first()).toBeVisible();
 
-  await page.getByRole("main").getByRole("link", { name: "Jetzt Wohnzimmer gestalten" }).first().click();
+  await page.getByRole("main").getByRole("link", { name: "Jetzt Wohnzimmer planen" }).first().click();
   await expect(page).toHaveURL(/\/gestalten$/);
   await expect(page.getByRole("heading", { name: "Lade ein Foto deines Wohnzimmers hoch" })).toBeVisible();
+});
+
+test("Vorschauversion wird ehrlich gekennzeichnet", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByText("Die KI-Gestaltung ist in Vorbereitung, Designpakete sind noch nicht buchbar")).toBeVisible();
+  await expect(page.getByRole("main").getByText("Die KI-Gestaltung ist noch in Vorbereitung.")).toBeVisible();
+  await expect(page.getByText("In Vorbereitung", { exact: true }).first()).toBeVisible();
+
+  await page.goto("/preise");
+  await expect(page.getByText("Paket noch nicht buchbar").first()).toBeVisible();
+  await expect(page.getByText("Geplant", { exact: true }).first()).toBeVisible();
+  await page.getByText("Kann ich DesignBySari schon nutzen?").click();
+  await expect(page.getByText("Die KI-Gestaltung und die Designpakete sind noch in Vorbereitung.")).toBeVisible();
+
+  await page.goto("/gestalten");
+  await expect(page.getByText("deshalb wird noch kein Design erzeugt")).toBeVisible();
 });
 
 test("Vorher/Nachher-Regler ist per Tastatur bedienbar", async ({ page }) => {

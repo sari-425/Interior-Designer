@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s · DesignBySari",
   },
   description:
-    "Lade ein Foto deines Wohnzimmers hoch, wähle Stil, Farben und Budget und entdecke, wie dein Wohnzimmer neu aussehen kann. Einrichtungsplanung mit KI für Deutschland.",
+    "Lade ein Foto deines Wohnzimmers hoch, wähle Stil, Farben und Budget und lege fest, welche Möbel bleiben. Wohnzimmer-Planung mit KI für Deutschland, derzeit als Vorschauversion.",
   applicationName: "DesignBySari",
 };
 

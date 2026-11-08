@@ -9,6 +9,10 @@ export const metadata: Metadata = {
 export default function TransparencyPage() {
   return (
     <LegalPage title="KI und Partnerlinks">
+      <p>
+        <strong>Stand: Vorschauversion.</strong> Die KI-Gestaltung, Produktvorschläge und Partnerlinks sind noch
+        nicht aktiv. Diese Seite beschreibt, wie wir sie kennzeichnen werden.
+      </p>
       <h2>KI-generierte Bilder</h2>
       <p>
         Gestaltungsvorschläge von DesignBySari werden mit Künstlicher Intelligenz erzeugt und als solche gekennzeichnet.

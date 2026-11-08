@@ -59,7 +59,7 @@ export function FurnitureStep({ draft, update }: FurnitureStepProps) {
 
       <h3 className="mt-12 text-xl">Raum und Oberflächen</h3>
       <p className="mt-1 text-sm text-muted">
-        Fenster, Türen und die Raumaufteilung versucht die KI immer unverändert zu lassen.
+        Fenster, Türen und die Raumaufteilung soll die KI später immer möglichst unverändert lassen.
       </p>
       <ul className="mt-4 divide-y divide-line rounded-[var(--radius-card)] border border-line bg-paper">
         {ROOM_SURFACES.map((surface) => {

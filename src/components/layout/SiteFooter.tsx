@@ -20,7 +20,7 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-3">
             <li>
               <Link href="/gestalten" className="text-charcoal/80 hover:text-charcoal">
-                Wohnzimmer gestalten
+                Wohnzimmer planen
               </Link>
             </li>
             {MAIN_NAV.map((item) => (

@@ -159,10 +159,10 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
           </p>
         </div>
         <div className="rounded-2xl bg-sand/40 p-5 text-[0.95rem] leading-relaxed">
-          <p className="font-semibold">So arbeitet die KI</p>
+          <p className="font-semibold">So wird die KI arbeiten</p>
           <p className="mt-1 text-muted">
-            Die KI entwirft eine neue Einrichtung auf Basis deines Fotos. Bitte achte darauf, dass keine Personen
-            oder privaten Dokumente zu sehen sind.
+            Sobald die KI-Gestaltung bereit ist, entwirft sie eine neue Einrichtung auf Basis deines Fotos. Achte
+            schon jetzt darauf, dass keine Personen oder privaten Dokumente zu sehen sind.
           </p>
         </div>
       </div>

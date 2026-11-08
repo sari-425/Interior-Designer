@@ -9,7 +9,7 @@ export function PricingTeaser() {
         <SectionHeading
           eyebrow="Preise"
           title="Erst ausprobieren, dann entscheiden"
-          intro="Du startest kostenlos. Wenn dir gefällt, was du siehst, wählst du ein Designpaket. Kein Abo."
+          intro="So ist es geplant: Du startest kostenlos und wählst erst ein Designpaket, wenn dir gefällt, was du siehst. Kein Abo. Die Pakete sind noch nicht buchbar."
         />
         <div className="mt-12">
           <PricingCards />

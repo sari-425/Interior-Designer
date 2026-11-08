@@ -6,25 +6,29 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
   title: "Preise",
-  description: "Kostenlos ausprobieren, dann das passende Designpaket wählen. Einmalige Preise, kein Abo.",
+  description: "Geplante Designpakete von DesignBySari: einmalige Preise, kein Abo. Noch nicht buchbar, der Planungsablauf ist kostenlos testbar.",
 };
 
 const FAQ = [
   {
+    q: "Kann ich DesignBySari schon nutzen?",
+    a: "Teilweise. In der Vorschauversion kannst du den Planungsablauf kostenlos ausprobieren: Foto hochladen, Stil, Farben, Budget und Möbel festlegen. Die KI-Gestaltung und die Designpakete sind noch in Vorbereitung. Es entstehen dir keine Kosten, und dein Foto verlässt deinen Browser nicht.",
+  },
+  {
     q: "Muss ich mich registrieren?",
-    a: "Nein. Du kannst DesignBySari zunächst ohne Konto ausprobieren. Ein Konto brauchst du erst, wenn du Projekte speichern möchtest.",
+    a: "Nein. Die Vorschau funktioniert ohne Konto. Später brauchst du ein Konto nur, wenn du Projekte speichern möchtest.",
   },
   {
     q: "Ist das ein Abo?",
-    a: "Nein. Jedes Designpaket wird einmalig bezahlt. Es gibt keine automatische Verlängerung.",
+    a: "Nein. Geplant ist, dass jedes Designpaket einmalig bezahlt wird, ohne automatische Verlängerung. Buchbar sind die Pakete noch nicht.",
   },
   {
     q: "Sind die vorgeschlagenen Möbel genau die aus dem Bild?",
-    a: "In der Regel nicht. Die KI entwirft eine Gestaltungsidee. Wir schlagen dir dazu ähnliche, tatsächlich erhältliche Produkte vor und kennzeichnen deutlich, wenn ein Produkt nur ähnlich ist.",
+    a: "In der Regel nicht. Die KI wird eine Gestaltungsidee entwerfen. Dazu werden wir dir ähnliche, tatsächlich erhältliche Produkte vorschlagen und deutlich kennzeichnen, wenn ein Produkt nur ähnlich ist.",
   },
   {
     q: "Verdient DesignBySari an Produktlinks?",
-    a: "Teilweise ja. Wenn du über einen markierten Partnerlink kaufst, kann DesignBySari eine Provision erhalten. Für dich ändert sich der Preis dadurch nicht.",
+    a: "Später teilweise ja. Wenn du über einen markierten Partnerlink kaufst, kann DesignBySari eine Provision erhalten. Für dich ändert sich der Preis dadurch nicht. Derzeit gibt es noch keine Produkt- oder Partnerlinks.",
   },
 ] as const;
 
@@ -37,7 +41,7 @@ export default function PricingPage() {
             as="h1"
             eyebrow="Preise"
             title="Einfache Pakete, faire Preise"
-            intro="Starte kostenlos. Wenn du mehr Varianten, einen Budget-Planer oder mehrere Räume brauchst, wählst du ein Paket."
+            intro="Die Designpakete starten zusammen mit der KI-Gestaltung und sind noch nicht buchbar. Hier siehst du vorab, was geplant ist. Den Planungsablauf kannst du schon heute kostenlos ausprobieren."
           />
           <div className="mt-12">
             <PricingCards />
