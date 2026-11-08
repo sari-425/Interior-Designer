@@ -6,19 +6,25 @@ DesignBySari ist eine deutschsprachige KI-Interior-Design-Plattform für Privatp
 
 ## Projektstand
 
-| Phase | Inhalt | Status |
-| --- | --- | --- |
-| 0 | Analyse und Umsetzungsplan | abgeschlossen |
-| 1 | Frontend: Landingpage, Navigation, Stile, Preise, Gestaltungs-Ablauf | fertig (PR #1) |
-| 1b | Wohnzimmer-Projektablauf, Marke DesignBySari, Vorbereitung KI-Anbieter und Supabase | **in Arbeit** |
-| 2 | KI-Prototyp mit austauschbarem Anbieter | offen |
-| 3 | Produktsystem, Händler-Adapter, Budget-Planer | offen |
-| 4 | Supabase: Konten, Projekte, Bildspeicher, Datenschutz | offen |
-| 5 | Stripe-Testmodus, Designpakete | offen |
-| 6 | Administration | offen |
-| 7 | Qualität und Veröffentlichung | offen |
+| Bereich | Stand |
+| --- | --- |
+| Website (Startseite, Stile, Preise, Rechtstexte als Entwurf) | fertig, als Vorschauversion gekennzeichnet |
+| Wohnzimmer-Designer (Foto bis Zusammenfassung, Ergebnisansicht) | fertig und getestet |
+| KI (Bildanalyse, Designplanung, Bildgenerierung) | Architektur, Limits und Schnittstelle fertig, **kein Anbieter angebunden** |
+| Echte Produkte | Datenmodell, Prüfung und Suche fertig, **keine Produktquelle angebunden** |
+| Konten und Projekte | Schnittstellen, Prüfregeln und Datenbank-Entwurf fertig, **Supabase nicht eingerichtet** |
+| Zahlungen | Stripe vorbereitet und standardmäßig aus, **keine Zahlungen möglich** |
 
-**Wichtig:** In der aktuellen Version gibt es keine KI-Generierung, keine Datenbank und keine Zahlungen. Hochgeladene Fotos bleiben im Browser. Alle Bilder sind gezeichnete Illustrationen und als solche gekennzeichnet.
+**Wichtig:** Es gibt derzeit keine KI-Generierung, keine Datenbank und keine Zahlungen. Hochgeladene Fotos bleiben im Browser. Alle Bilder sind gezeichnete Illustrationen und als solche gekennzeichnet.
+
+Weitere Dokumentation:
+
+- [Technische Architektur](docs/architektur.md)
+- [Funktionsübersicht](docs/funktionen.md)
+- [Offene Integrationen und bekannte Einschränkungen](docs/offene-integrationen.md)
+- [Tests](docs/tests.md)
+- [Sicherheit und Datenschutz](docs/sicherheit-datenschutz.md)
+- Entscheidungen: [docs/decisions](docs/decisions)
 
 ## Technik
 
@@ -65,44 +71,35 @@ npx playwright install chromium
 
 ```text
 src/
-├─ app/                  Seiten (Next.js App Router)
-│  ├─ page.tsx           Landingpage
-│  ├─ gestalten/         Wohnzimmer-Projekt in 5 Schritten
+├─ app/                  Seiten und Server-Routen (Next.js App Router)
+│  ├─ page.tsx           Startseite
+│  ├─ gestalten/         Wohnzimmer-Designer
 │  ├─ stile/, preise/    Stil- und Preisseite
-│  └─ impressum/, datenschutz/, agb/, transparenz/   Rechtstexte (Entwürfe)
-├─ components/
-│  ├─ brand/             Wortmarke
-│  ├─ ui/                Grundbausteine (Button, Container, Badge …)
-│  ├─ layout/            Kopf- und Fußbereich
-│  ├─ marketing/         Abschnitte der Landingpage
-│  ├─ illustrations/     Gezeichnete Raum-Illustration (Platzhalter)
-│  └─ design-flow/       Schritte des Gestaltungs-Ablaufs
+│  ├─ api/designs/       POST: Design anfordern (antwortet 503, solange keine KI eingerichtet ist)
+│  ├─ api/payments/webhook/  Stripe-Webhook (deaktiviert)
+│  ├─ robots.ts, sitemap.ts, opengraph-image.tsx   SEO
+│  └─ impressum/, datenschutz/, agb/, transparenz/  Rechtstexte (Entwürfe)
+├─ components/           Oberfläche (brand, ui, layout, marketing, illustrations, design-flow)
 ├─ modules/              Geschäftslogik ohne Oberfläche
-│  ├─ styles/            Designstile (modular erweiterbar)
-│  ├─ rooms/             Raumtypen (derzeit nur Wohnzimmer)
 │  ├─ design-request/    Optionen und Zod-Schema der Wohnzimmer-Anfrage
-│  ├─ pricing/           Vorläufige Designpakete
-│  ├─ ai/                Schnittstelle für austauschbare KI-Bildanbieter (noch kein Anbieter aktiv)
-│  └─ projects/          Datenmodell und Speicher-Schnittstelle für Projekte
-└─ lib/validation/       Bildprüfung (Typ, Inhalt, Größe, Maße)
-supabase/migrations/     Datenbankschema mit Zugriffsschutz (Entwurf, noch nicht ausgeführt)
-tests/
-├─ unit/                 Vitest
-└─ e2e/                  Playwright
+│  ├─ ai/                KI-Schicht: Typen, Anbieter-Verzeichnis, Limits, Ablauf, Server-Verarbeitung
+│  ├─ products/          Produktdaten, Prüfung, Kennzeichnung, Suche
+│  ├─ accounts/          Prüfregeln und Schnittstellen für Konten und Profile
+│  ├─ projects/          Projektmodell, Speicher-Schnittstelle, Referenz-Umsetzung
+│  ├─ payments/          Zahlungen (Stripe vorbereitet)
+│  ├─ pricing/, styles/, rooms/
+└─ lib/                  Bildprüfung, Website-Angaben
+supabase/migrations/     Datenbankschema mit Zugriffsschutz (Entwurf, nicht ausgeführt)
+tests/unit, tests/e2e    Vitest und Playwright
 ```
 
 ## Der Wohnzimmer-Ablauf
 
-1. **Foto:** JPG, JPEG, PNG oder WebP, höchstens 10 MB, mindestens 640 × 480 Pixel. Geprüft werden Dateityp, echter Dateiinhalt und Bildmaße. Das Foto bleibt derzeit im Browser.
+1. **Foto:** JPG, JPEG, PNG oder WebP, höchstens 10 MB, mindestens 640 × 480 Pixel, mit Vorschau.
 2. **Stil:** Modern, Skandinavisch, Minimalistisch, Industrial, Japandi, Klassisch, Landhaus, Luxuriös.
-3. **Raum:** Raumgröße (optional), Farben, Atmosphäre, maximales Budget, sonstige Wünsche.
-4. **Möbel:** Für jedes Möbelstück „Nicht vorhanden“, „Behalten“ oder „Ersetzen“.
-5. **Zusammenfassung:** Alle Angaben mit „Ändern“-Sprüngen. Es wird noch nichts abgeschickt.
-
-## KI-Anbieter und Supabase (vorbereitet, nicht aktiv)
-
-- `src/modules/ai/image-provider.ts` beschreibt, was jeder KI-Anbieter können muss. `registry.ts` wählt den Anbieter über `AI_PROVIDER`. Derzeit ist bewusst **kein** Anbieter eingetragen und es gibt keinen Schein-Anbieter.
-- `supabase/migrations/…_living_room_projects.sql` enthält Tabelle, Row Level Security und einen privaten Foto-Speicher. Jede Person sieht nur ihre eigenen Projekte. Die Datei wird erst ausgeführt, wenn ein Supabase-Projekt eingerichtet und freigegeben ist.
+3. **Raum:** Raumgröße, Raummerkmale, Farben, Atmosphäre, Budget in Euro, besondere Anforderungen, Wünsche, Anzahl Designvarianten.
+4. **Möbel:** Möbel behalten oder ersetzen; Boden, Wände, Decke, Einbauten, Heizkörper behalten oder ändern.
+5. **Zusammenfassung:** Alle Angaben mit „Ändern“ und die Ergebnisansicht. Ohne KI wird nichts übertragen.
 
 ## Designstile ergänzen
 

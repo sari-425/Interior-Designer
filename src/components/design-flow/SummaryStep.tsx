@@ -2,12 +2,14 @@ import { Button } from "@/components/ui/Button";
 import { ATMOSPHERES, COLOR_WORLDS } from "@/modules/design-request/options";
 import { getDesignStyle } from "@/modules/styles/styles";
 import { itemsWith, parseBudget, parseRoomSize, surfacesWith, toLivingRoomRequest, type WizardStepId } from "./draft";
+import { ResultPanel } from "./ResultPanel";
 import type { WizardDraft } from "./types";
 
 interface SummaryStepProps {
   draft: WizardDraft;
   goTo: (step: WizardStepId) => void;
   onRestart: () => void;
+  aiEnabled: boolean;
 }
 
 interface Row {
@@ -45,7 +47,7 @@ function SummaryList({ title, rows, goTo }: { title: string; rows: Row[]; goTo: 
   );
 }
 
-export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
+export function SummaryStep({ draft, goTo, onRestart, aiEnabled }: SummaryStepProps) {
   const result = toLivingRoomRequest(draft);
   const size = parseRoomSize(draft.roomSizeInput);
   const budget = parseBudget(draft.budgetInput);
@@ -62,10 +64,20 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
       value: size !== null && Number.isFinite(size) ? `${size.toLocaleString("de-DE")} m²` : none,
       step: "raum",
     },
+    {
+      label: "Raummerkmale",
+      value: draft.roomFeatures.length ? draft.roomFeatures.join(", ") : none,
+      step: "raum",
+    },
     { label: "Einrichtungsstil", value: draft.style ? getDesignStyle(draft.style).name : none, step: "stil" },
     { label: "Farben", value: COLOR_WORLDS.find((c) => c.id === draft.colorWorld)?.name ?? none, step: "raum" },
     { label: "Atmosphäre", value: ATMOSPHERES.find((a) => a.id === draft.atmosphere)?.name ?? none, step: "raum" },
     { label: "Budget", value: budget ? `bis ${budget.toLocaleString("de-DE")} €` : none, step: "raum" },
+    {
+      label: "Anforderungen",
+      value: draft.requirements.length ? draft.requirements.join(", ") : none,
+      step: "raum",
+    },
     { label: "Wünsche", value: draft.notes.trim() || none, step: "raum" },
     { label: "Designvarianten", value: String(draft.variants), step: "raum" },
   ];
@@ -110,9 +122,9 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
           <>
             <p className="text-lg font-semibold">Deine Angaben sind vollständig.</p>
             <p className="mt-2 leading-relaxed text-muted">
-              Die KI-Gestaltung richten wir gerade ein. In dieser Vorschauversion wird dein Projekt deshalb noch nicht
-              abgeschickt, gespeichert oder von einer KI bearbeitet. Sobald es so weit ist, startest du hier dein
-              neues Wohnzimmer-Design.
+              {aiEnabled
+                ? "Du kannst jetzt unten dein Design erstellen. Vorher kannst du jede Angabe mit „Ändern“ korrigieren."
+                : "Die KI-Gestaltung richten wir gerade ein. In dieser Vorschauversion wird dein Projekt deshalb noch nicht abgeschickt, gespeichert oder von einer KI bearbeitet. Sobald es so weit ist, startest du hier dein neues Wohnzimmer-Design."}
             </p>
           </>
         ) : (
@@ -122,6 +134,8 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
           </>
         )}
       </div>
+
+      {result.success && draft.photo && <ResultPanel request={result.data} photo={draft.photo} aiEnabled={aiEnabled} />}
 
       <div className="mt-8">
         <Button variant="secondary" onClick={onRestart}>

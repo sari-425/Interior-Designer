@@ -14,6 +14,12 @@ Datum: 2026-11-08 · Status: angenommen
 - **Vorschau ehrlich kennzeichnen:** Solange die KI nicht eingerichtet ist, sprechen Texte und Buttons von „planen“ statt „gestalten“, KI-Schritte und Designpakete sind als „In Vorbereitung“ bzw. „Geplant“ markiert.
 - **Kein Absenden:** Ohne Datenbank und KI gibt es nichts, wohin das Projekt geschickt werden könnte. Die Zusammenfassung sagt das offen, statt eine Verarbeitung vorzutäuschen.
 
+## Ergänzt am 2026-11-08 (Ausbau)
+
+- Raummerkmale und besondere Anforderungen im Schritt „Raum“ (optional, Mehrfachauswahl, Widersprüche wie „Niedrige“ und „Hohe Decke“ werden erklärt).
+- Ergebnisansicht in der Zusammenfassung statt eines sechsten Schritts, damit der Ablauf kurz bleibt.
+- Die KI ist in drei getrennte Schritte geteilt (Analyse, Planung, Bilder), damit Bild-KI und Sprachmodell unabhängig gewählt werden können. Details: [architektur.md](../architektur.md).
+
 ## Vorbereitet, nicht aktiv
 
 - `src/modules/ai/`: Schnittstelle `ImageGenerationProvider`, Auswahl über `AI_PROVIDER`. Kein Anbieter eingetragen, kein Schein-Anbieter.

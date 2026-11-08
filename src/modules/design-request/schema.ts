@@ -9,7 +9,9 @@ import {
   NOTES_MAX,
   ROOM_SIZE_MAX,
   ROOM_SIZE_MIN,
+  ROOM_FEATURES,
   ROOM_SURFACES,
+  SPECIAL_REQUIREMENTS,
   VARIANT_COUNTS,
 } from "./options";
 
@@ -28,6 +30,7 @@ export const livingRoomRequestSchema = z
       .min(ROOM_SIZE_MIN, `Die Raumgröße muss mindestens ${ROOM_SIZE_MIN} m² betragen.`)
       .max(ROOM_SIZE_MAX, `Die Raumgröße darf höchstens ${ROOM_SIZE_MAX} m² betragen.`)
       .nullable(),
+    roomFeatures: z.array(z.enum(ROOM_FEATURES, { error: "Unbekanntes Raummerkmal." })),
     style: z.enum(DESIGN_STYLE_IDS, { error: "Bitte wähle einen Einrichtungsstil." }),
     colorWorld: z.enum(COLOR_WORLD_IDS, { error: "Bitte wähle deine Farben." }),
     atmosphere: z.enum(ATMOSPHERE_IDS, { error: "Bitte wähle eine Atmosphäre." }),
@@ -40,6 +43,7 @@ export const livingRoomRequestSchema = z
     replace: z.array(z.enum(LIVING_ROOM_ITEMS)),
     keepSurfaces: z.array(z.enum(ROOM_SURFACES)),
     changeSurfaces: z.array(z.enum(ROOM_SURFACES)),
+    requirements: z.array(z.enum(SPECIAL_REQUIREMENTS, { error: "Unbekannte Anforderung." })),
     notes: z.string().trim().max(NOTES_MAX, `Bitte fasse deine Wünsche in höchstens ${NOTES_MAX} Zeichen zusammen.`),
     variants: z
       .number()
@@ -64,6 +68,17 @@ export const livingRoomRequestSchema = z
     }
     if (new Set(value.keep).size !== value.keep.length || new Set(value.replace).size !== value.replace.length) {
       ctx.addIssue({ code: "custom", path: ["keep"], message: "Jedes Möbelstück darf nur einmal vorkommen." });
+    }
+    for (const key of ["roomFeatures", "requirements", "keepSurfaces", "changeSurfaces"] as const) {
+      if (new Set(value[key]).size !== value[key].length) {
+        ctx.addIssue({ code: "custom", path: [key], message: "Jede Angabe darf nur einmal vorkommen." });
+      }
+    }
+    if (value.roomFeatures.includes("Niedrige Decke") && value.roomFeatures.includes("Hohe Decke")) {
+      ctx.addIssue({ code: "custom", path: ["roomFeatures"], message: "Bitte wähle entweder „Niedrige Decke“ oder „Hohe Decke“." });
+    }
+    if (value.roomFeatures.includes("Viel Tageslicht") && value.roomFeatures.includes("Wenig Tageslicht")) {
+      ctx.addIssue({ code: "custom", path: ["roomFeatures"], message: "Bitte wähle entweder „Viel Tageslicht“ oder „Wenig Tageslicht“." });
     }
   });
 

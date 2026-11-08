@@ -62,6 +62,32 @@ export const SURFACE_DECISIONS = [
 ] as const;
 export type SurfaceDecision = (typeof SURFACE_DECISIONS)[number]["id"];
 
+/** Merkmale des Raums, die die Gestaltung beeinflussen (Mehrfachauswahl, optional) */
+export const ROOM_FEATURES = [
+  "Viel Tageslicht",
+  "Wenig Tageslicht",
+  "Große Fensterfront",
+  "Dachschräge",
+  "Niedrige Decke",
+  "Hohe Decke",
+  "Offener Wohn- und Essbereich",
+  "Kamin oder Ofen",
+  "Balkon- oder Terrassentür",
+] as const;
+export type RoomFeature = (typeof ROOM_FEATURES)[number];
+
+/** Besondere Anforderungen an die Einrichtung (Mehrfachauswahl, optional) */
+export const SPECIAL_REQUIREMENTS = [
+  "Kinderfreundlich",
+  "Haustiere im Haushalt",
+  "Viel Stauraum",
+  "Homeoffice-Ecke",
+  "Barrierearm",
+  "Pflegeleichte Materialien",
+  "Platz für Gäste",
+] as const;
+export type SpecialRequirement = (typeof SPECIAL_REQUIREMENTS)[number];
+
 export const VARIANT_COUNTS = [1, 2, 3, 4] as const;
 export type VariantCount = (typeof VARIANT_COUNTS)[number];
 

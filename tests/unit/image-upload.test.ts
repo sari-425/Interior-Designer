@@ -3,6 +3,7 @@ import {
   detectImageFormat,
   formatBytes,
   MAX_IMAGE_BYTES,
+  readImageDimensions,
   validateImageDimensions,
   validateImageFile,
 } from "@/lib/validation/image-upload";
@@ -79,5 +80,41 @@ describe("formatBytes", () => {
     expect(formatBytes(512)).toBe("1 KB");
     expect(formatBytes(2048)).toBe("2 KB");
     expect(formatBytes(1.5 * 1024 * 1024)).toBe("1,5 MB");
+  });
+});
+
+describe("readImageDimensions (Serverprüfung)", () => {
+  it("liest PNG-Maße", async () => {
+    const { createPng } = await import("../e2e/helpers");
+    expect(readImageDimensions(new Uint8Array(createPng(800, 600)))).toEqual({ width: 800, height: 600 });
+  });
+
+  it("liest JPEG-Maße hinter anderen Segmenten", () => {
+    const app0 = [0xff, 0xe0, 0x00, 0x10, ...Buffer.from("JFIF\0"), 1, 1, 0, 0, 1, 0, 1, 0, 0];
+    const dht = [0xff, 0xc4, 0x00, 0x04, 0x00, 0x00];
+    const sof2 = [0xff, 0xc2, 0x00, 0x11, 0x08, 0x02, 0x58, 0x03, 0x20, 0x03, 1, 0x22, 0, 2, 0x11, 1, 3, 0x11, 1];
+    const jpeg = new Uint8Array([0xff, 0xd8, ...app0, ...dht, ...sof2, 0xff, 0xd9]);
+    expect(readImageDimensions(jpeg)).toEqual({ width: 800, height: 600 });
+  });
+
+  it("liest WebP-Maße (VP8X, VP8L, VP8)", () => {
+    const head = (chunk: string) => [...Buffer.from("RIFF"), 0, 0, 0, 0, ...Buffer.from("WEBP"), ...Buffer.from(chunk), 0, 0, 0, 0];
+    // VP8X: Flags (4 Bytes), dann Breite-1 und Höhe-1 als 24 Bit
+    const vp8x = new Uint8Array([...head("VP8X"), 0, 0, 0, 0, 0x1f, 0x03, 0x00, 0x57, 0x02, 0x00]);
+    expect(readImageDimensions(vp8x)).toEqual({ width: 800, height: 600 });
+    // VP8L: Signatur 0x2f, dann 14 Bit Breite-1 und 14 Bit Höhe-1
+    const bits = (800 - 1) | ((600 - 1) << 14);
+    const vp8l = new Uint8Array([...head("VP8L"), 0x2f, bits & 0xff, (bits >> 8) & 0xff, (bits >> 16) & 0xff, (bits >> 24) & 0xff]);
+    expect(readImageDimensions(vp8l)).toEqual({ width: 800, height: 600 });
+    // VP8: 3 Bytes Frame-Tag, Startcode 9d 01 2a, dann Breite und Höhe (16 Bit LE)
+    const vp8 = new Uint8Array([...head("VP8 "), 0, 0, 0, 0x9d, 0x01, 0x2a, 0x20, 0x03, 0x58, 0x02]);
+    expect(readImageDimensions(vp8)).toEqual({ width: 800, height: 600 });
+  });
+
+  it("liefert null bei unbekannten oder abgeschnittenen Daten", () => {
+    expect(readImageDimensions(TEXT)).toBeNull();
+    expect(readImageDimensions(PNG)).toBeNull();
+    expect(readImageDimensions(JPEG)).toBeNull();
+    expect(readImageDimensions(WEBP)).toBeNull();
   });
 });

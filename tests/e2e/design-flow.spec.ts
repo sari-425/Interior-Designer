@@ -41,6 +41,8 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   await next(page).click();
   await expect(alert(page)).toContainText("Farben");
   await page.getByLabel("Raumgröße").fill("24,5");
+  await page.getByText("Dachschräge", { exact: true }).click();
+  await page.getByText("Haustiere im Haushalt", { exact: true }).click();
   await page.getByText("Warm und erdig").click();
   await next(page).click();
   await expect(alert(page)).toContainText("Atmosphäre");
@@ -77,6 +79,18 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   await expect(main.getByText("Bodenbelag", { exact: true })).toBeVisible();
   await expect(main.getByText("Wandfarbe", { exact: true })).toBeVisible();
   await expect(main.getByText("3", { exact: true })).toBeVisible();
+  await expect(main.getByText("Dachschräge", { exact: true })).toBeVisible();
+  await expect(main.getByText("Haustiere im Haushalt", { exact: true })).toBeVisible();
+
+  // Ergebnisansicht: ehrlich, ohne KI-Aufruf und ohne Foto-Übertragung
+  const uploads: string[] = [];
+  page.on("request", (r) => r.method() === "POST" && uploads.push(r.url()));
+  await expect(page.getByRole("heading", { name: "Dein Ergebnis" })).toBeVisible();
+  await expect(page.getByText("KI-Gestaltung in Vorbereitung")).toBeVisible();
+  await expect(page.getByText("3 Designvarianten")).toBeVisible();
+  await expect(page.getByText("Einkaufsliste bis 2.500 €")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Design erstellen/ })).toBeDisabled();
+  expect(uploads).toEqual([]);
   await expect(page.getByText("Deine Angaben sind vollständig.")).toBeVisible();
   // Ehrlicher Hinweis statt vorgetäuschter Generierung
   await expect(page.getByText("noch nicht abgeschickt, gespeichert oder von einer KI bearbeitet")).toBeVisible();
@@ -150,4 +164,17 @@ test("Zurück-Navigation behält alle Angaben", async ({ page }) => {
   await next(page).click();
   await next(page).click();
   await expect(page.getByRole("radio", { name: /Hell und luftig/ })).toBeChecked();
+});
+
+test("Widersprüchliche Raummerkmale werden erklärt", async ({ page }) => {
+  await uploadAndChooseStyle(page);
+  await page.getByText("Niedrige Decke", { exact: true }).click();
+  await page.getByText("Hohe Decke", { exact: true }).click();
+  await page.getByText("Hell und natürlich").click();
+  await page.getByText("Gemütlich", { exact: true }).click();
+  await next(page).click();
+  await expect(alert(page)).toContainText("entweder „Niedrige Decke“ oder „Hohe Decke“");
+  await page.getByText("Hohe Decke", { exact: true }).click();
+  await next(page).click();
+  await expect(page.getByRole("heading", { name: "Was bleibt, was kommt neu?" })).toBeVisible();
 });
