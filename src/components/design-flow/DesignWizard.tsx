@@ -4,17 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { validateStep, type WizardStepId } from "./draft";
 import { PhotoStep } from "./PhotoStep";
-import { PreferencesStep } from "./PreferencesStep";
-import { RoomStep } from "./RoomStep";
+import { FurnitureStep } from "./FurnitureStep";
+import { RoomDetailsStep } from "./RoomDetailsStep";
 import { StyleStep } from "./StyleStep";
 import { SummaryStep } from "./SummaryStep";
 import { INITIAL_DRAFT, type WizardDraft } from "./types";
 
 const STEPS: { id: WizardStepId; label: string }[] = [
   { id: "foto", label: "Foto" },
-  { id: "raum", label: "Raum" },
   { id: "stil", label: "Stil" },
-  { id: "wuensche", label: "Wünsche" },
+  { id: "raum", label: "Raum" },
+  { id: "moebel", label: "Möbel" },
   { id: "uebersicht", label: "Übersicht" },
 ];
 
@@ -116,9 +116,9 @@ export function DesignWizard() {
 
       <div ref={panelRef} tabIndex={-1} className="outline-none" aria-live="polite">
         {step.id === "foto" && <PhotoStep photo={draft.photo} onChange={(photo) => update({ photo })} />}
-        {step.id === "raum" && <RoomStep value={draft.roomType} onChange={(roomType) => update({ roomType })} />}
         {step.id === "stil" && <StyleStep value={draft.style} onChange={(style) => update({ style })} />}
-        {step.id === "wuensche" && <PreferencesStep draft={draft} update={update} />}
+        {step.id === "raum" && <RoomDetailsStep draft={draft} update={update} />}
+        {step.id === "moebel" && <FurnitureStep draft={draft} update={update} />}
         {step.id === "uebersicht" && <SummaryStep draft={draft} goTo={goTo} onRestart={restart} />}
       </div>
 
@@ -138,7 +138,7 @@ export function DesignWizard() {
             <span />
           )}
           <Button onClick={next} size="lg">
-            {index === STEPS.length - 2 ? "Zur Übersicht" : "Weiter"}
+            {index === STEPS.length - 2 ? "Zur Zusammenfassung" : "Weiter"}
           </Button>
         </div>
       )}

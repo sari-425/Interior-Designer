@@ -2,14 +2,14 @@ import { expect, test } from "@playwright/test";
 
 test("Startseite zeigt Marke, Claim und führt zur Gestaltung", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveTitle(/ROOMORA/);
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Dein Raum.");
+  await expect(page).toHaveTitle(/DesignBySari/);
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Dein Zuhause.");
   await expect(page.getByText("Beispiel · Illustration").first()).toBeVisible();
   await expect(page.getByText("9,90 €").first()).toBeVisible();
 
-  await page.getByRole("main").getByRole("link", { name: "Jetzt Raum gestalten" }).first().click();
+  await page.getByRole("main").getByRole("link", { name: "Jetzt Wohnzimmer gestalten" }).first().click();
   await expect(page).toHaveURL(/\/gestalten$/);
-  await expect(page.getByRole("heading", { name: "Lade ein Foto deines Raums hoch" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Lade ein Foto deines Wohnzimmers hoch" })).toBeVisible();
 });
 
 test("Vorher/Nachher-Regler ist per Tastatur bedienbar", async ({ page }) => {

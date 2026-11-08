@@ -8,7 +8,7 @@ import { DESIGN_STYLES } from "@/modules/styles/styles";
 
 export const metadata: Metadata = {
   title: "Designstile",
-  description: "Modern, Skandinavisch, Japandi und mehr: Entdecke die Einrichtungsstile von ROOMORA.",
+  description: "Modern, Skandinavisch, Japandi und mehr: Entdecke die Einrichtungsstile von DesignBySari.",
 };
 
 export default function StylesPage() {

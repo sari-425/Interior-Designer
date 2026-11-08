@@ -12,7 +12,7 @@ export function StyleShowcase() {
           <SectionHeading
             eyebrow="Designstile"
             title="Finde den Stil, der zu dir passt"
-            intro="Acht Stilrichtungen zum Start, von hell und skandinavisch bis warm und boho. Die Bilder sind Illustrationen."
+            intro="Acht Einrichtungsstile für dein Wohnzimmer, von hell und skandinavisch bis gemütlich im Landhausstil. Die Bilder sind Illustrationen."
           />
           <ButtonLink href="/stile" variant="secondary" className="shrink-0 self-start md:self-auto">
             Alle Stile ansehen

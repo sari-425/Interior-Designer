@@ -8,10 +8,10 @@ export type DesignStyleId =
   | "skandinavisch"
   | "minimalistisch"
   | "industrial"
-  | "boho"
+  | "japandi"
   | "klassisch"
-  | "luxus"
-  | "japandi";
+  | "landhaus"
+  | "luxurioes";
 
 export interface DesignStyle {
   id: DesignStyleId;
@@ -59,11 +59,11 @@ export const DESIGN_STYLES: readonly DesignStyle[] = [
     palette: { wall: "#c9c3ba", floor: "#6f5d4a", sofa: "#4a4a44", accent: "#2b2b27", rug: "#8d8577" },
   },
   {
-    id: "boho",
-    name: "Boho",
-    description: "Warm, entspannt und persönlich mit Mustern und Pflanzen.",
-    traits: ["Natürliche Fasern", "Muster", "Viele Pflanzen"],
-    palette: { wall: "#efe3d3", floor: "#b48a62", sofa: "#c99a6e", accent: "#7a6a3f", rug: "#d9b892" },
+    id: "japandi",
+    name: "Japandi",
+    description: "Japanische Ruhe trifft skandinavische Wärme.",
+    traits: ["Niedrige Möbel", "Naturtöne", "Handwerk"],
+    palette: { wall: "#ede7dd", floor: "#a88d6d", sofa: "#bdb3a3", accent: "#4c4a40", rug: "#d6cab8" },
   },
   {
     id: "klassisch",
@@ -73,18 +73,18 @@ export const DESIGN_STYLES: readonly DesignStyle[] = [
     palette: { wall: "#ebe4d8", floor: "#8e6f52", sofa: "#7b8471", accent: "#5c4a36", rug: "#cdbba2" },
   },
   {
-    id: "luxus",
-    name: "Luxus",
+    id: "landhaus",
+    name: "Landhaus",
+    description: "Gemütlich und bodenständig mit Holz, Leinen und warmen Tönen.",
+    traits: ["Massives Holz", "Natürliche Stoffe", "Warme Gemütlichkeit"],
+    palette: { wall: "#f1ebe0", floor: "#a07d5a", sofa: "#d9cbb4", accent: "#6e5a43", rug: "#c9b08f" },
+  },
+  {
+    id: "luxurioes",
+    name: "Luxuriös",
     description: "Hochwertige Materialien und eine ruhige, edle Atmosphäre.",
     traits: ["Samt und Stein", "Warme Metalle", "Dezente Beleuchtung"],
     palette: { wall: "#dcd3c6", floor: "#5a4a3b", sofa: "#35352f", accent: "#a58d71", rug: "#bfae96" },
-  },
-  {
-    id: "japandi",
-    name: "Japandi",
-    description: "Japanische Ruhe trifft skandinavische Wärme.",
-    traits: ["Niedrige Möbel", "Naturtöne", "Handwerk"],
-    palette: { wall: "#ede7dd", floor: "#a88d6d", sofa: "#bdb3a3", accent: "#4c4a40", rug: "#d6cab8" },
   },
 ] as const;
 

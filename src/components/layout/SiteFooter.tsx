@@ -9,9 +9,9 @@ export function SiteFooter() {
       <Container className="grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
           <Wordmark />
-          <p className="mt-4 max-w-sm text-muted">Dein Raum. Dein Stil. Dein Zuhause.</p>
+          <p className="mt-4 max-w-sm text-muted">Dein Zuhause. Dein Budget. Dein Design.</p>
           <p className="mt-6 max-w-sm text-sm leading-relaxed text-muted">
-            ROOMORA ist eine unabhängige Plattform und gehört zu keinem Möbelhändler. Bilder, die mit KI erstellt
+            DesignBySari ist eine unabhängige Plattform und gehört zu keinem Möbelhändler. Bilder, die mit KI erstellt
             werden, kennzeichnen wir als solche. Partnerlinks markieren wir sichtbar.
           </p>
         </div>
@@ -20,7 +20,7 @@ export function SiteFooter() {
           <ul className="mt-4 space-y-3">
             <li>
               <Link href="/gestalten" className="text-charcoal/80 hover:text-charcoal">
-                Raum gestalten
+                Wohnzimmer gestalten
               </Link>
             </li>
             {MAIN_NAV.map((item) => (
@@ -47,7 +47,7 @@ export function SiteFooter() {
       </Container>
       <div className="border-t border-line">
         <Container className="flex flex-col gap-2 py-6 text-sm text-muted sm:flex-row sm:justify-between">
-          <p>© ROOMORA</p>
+          <p>© DesignBySari</p>
           <p>Vorschauversion: Es werden noch keine Bestellungen angenommen.</p>
         </Container>
       </div>

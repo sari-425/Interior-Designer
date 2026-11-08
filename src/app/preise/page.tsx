@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Muss ich mich registrieren?",
-    a: "Nein. Du kannst ROOMORA zunächst ohne Konto ausprobieren. Ein Konto brauchst du erst, wenn du Projekte speichern möchtest.",
+    a: "Nein. Du kannst DesignBySari zunächst ohne Konto ausprobieren. Ein Konto brauchst du erst, wenn du Projekte speichern möchtest.",
   },
   {
     q: "Ist das ein Abo?",
@@ -23,8 +23,8 @@ const FAQ = [
     a: "In der Regel nicht. Die KI entwirft eine Gestaltungsidee. Wir schlagen dir dazu ähnliche, tatsächlich erhältliche Produkte vor und kennzeichnen deutlich, wenn ein Produkt nur ähnlich ist.",
   },
   {
-    q: "Verdient ROOMORA an Produktlinks?",
-    a: "Teilweise ja. Wenn du über einen markierten Partnerlink kaufst, kann ROOMORA eine Provision erhalten. Für dich ändert sich der Preis dadurch nicht.",
+    q: "Verdient DesignBySari an Produktlinks?",
+    a: "Teilweise ja. Wenn du über einen markierten Partnerlink kaufst, kann DesignBySari eine Provision erhalten. Für dich ändert sich der Preis dadurch nicht.",
   },
 ] as const;
 

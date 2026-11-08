@@ -21,22 +21,22 @@ export const DESIGN_PACKAGES: readonly DesignPackage[] = [
     name: "Basic",
     priceCents: 990,
     tagline: "Für den ersten Eindruck",
-    features: ["1 Raum", "2 Designvarianten", "Passende Produktideen"],
+    features: ["1 Wohnzimmer", "2 Designvarianten", "Passende Produktideen"],
   },
   {
     id: "plus",
     name: "Plus",
     priceCents: 1990,
     tagline: "Für die konkrete Umsetzung",
-    features: ["1 Raum", "4 Designvarianten", "Budget-Planer", "Einkaufsliste zum Speichern"],
+    features: ["1 Wohnzimmer", "4 Designvarianten", "Budget-Planer", "Einkaufsliste mit Gesamtkosten"],
     highlighted: true,
   },
   {
     id: "premium",
     name: "Premium",
     priceCents: 4990,
-    tagline: "Für mehrere Räume",
-    features: ["Bis zu 3 Räume", "6 Designvarianten je Raum", "Budget-Planer", "Einkaufslisten für alle Räume"],
+    tagline: "Für mehrere Projekte",
+    features: ["Bis zu 3 Wohnzimmer-Projekte", "6 Designvarianten je Projekt", "Budget-Planer", "Einkaufslisten mit Gesamtkosten"],
   },
 ] as const;
 

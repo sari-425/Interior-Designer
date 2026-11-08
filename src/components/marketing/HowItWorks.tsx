@@ -4,15 +4,15 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 const STEPS = [
   {
     title: "Foto hochladen",
-    text: "Fotografiere deinen Raum bei Tageslicht und lade das Bild hoch. JPG, PNG oder WebP genügen.",
+    text: "Fotografiere dein Wohnzimmer bei Tageslicht und lade das Bild hoch. JPG, PNG oder WebP genügen.",
   },
   {
-    title: "Stil und Budget wählen",
-    text: "Entscheide dich für einen Stil, eine Farbwelt und dein Budget. Sag uns, was bleiben soll.",
+    title: "Wünsche festlegen",
+    text: "Wähle Stil, Farben, Atmosphäre und dein Budget. Markiere, welche Möbel bleiben und welche ersetzt werden.",
   },
   {
     title: "Neues Design entdecken",
-    text: "Die KI gestaltet deinen Raum neu und lässt Fenster, Türen und Grundriss möglichst unverändert.",
+    text: "Die KI gestaltet dein Wohnzimmer neu und lässt Fenster, Türen und Grundriss möglichst unverändert.",
   },
   {
     title: "Passend einrichten",
@@ -26,8 +26,8 @@ export function HowItWorks() {
       <Container>
         <SectionHeading
           eyebrow="So funktioniert’s"
-          title="Vom Foto zum neuen Zuhause in vier Schritten"
-          intro="Kein Fachwissen nötig. Du entscheidest, ROOMORA macht deine Ideen sichtbar."
+          title="Vom Foto zum neuen Wohnzimmer in vier Schritten"
+          intro="Kein Fachwissen nötig. Du entscheidest, DesignBySari macht deine Ideen sichtbar."
         />
         <ol className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {STEPS.map((step, i) => (

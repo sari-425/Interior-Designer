@@ -8,7 +8,7 @@ const PRINCIPLES = [
   },
   {
     title: "Unabhängig",
-    text: "ROOMORA gehört zu keinem Möbelhändler. Produktvorschläge stammen aus echten Händlerdaten, Partnerlinks markieren wir sichtbar.",
+    text: "DesignBySari gehört zu keinem Möbelhändler. Produktvorschläge stammen aus echten Händlerdaten, Partnerlinks markieren wir sichtbar.",
   },
   {
     title: "Deine Fotos gehören dir",

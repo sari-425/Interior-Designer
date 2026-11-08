@@ -1,9 +1,8 @@
 import type { DesignStyleId } from "@/modules/styles/styles";
-import type { RoomTypeId } from "@/modules/rooms/room-types";
-import type { ColorWorldId, FurnitureOption, RoomElement, VariantCount } from "@/modules/design-request/options";
+import type { AtmosphereId, ColorWorldId, ItemDecision, LivingRoomItem } from "@/modules/design-request/options";
 
 export interface RoomPhoto {
-  /** Lokale Objekt-URL, nur im Browser gültig */
+  /** Lokale Objekt-URL, nur in diesem Browser-Tab gültig */
   url: string;
   name: string;
   size: number;
@@ -11,28 +10,25 @@ export interface RoomPhoto {
   height: number;
 }
 
-export type ElementChoice = "keep" | "change" | "open";
-
+/** Zwischenstand des Wohnzimmer-Projekts während der Eingabe */
 export interface WizardDraft {
   photo: RoomPhoto | null;
-  roomType: RoomTypeId | null;
   style: DesignStyleId | null;
+  roomSizeInput: string;
   colorWorld: ColorWorldId | null;
+  atmosphere: AtmosphereId | null;
   budgetInput: string;
-  furniture: FurnitureOption[];
-  elements: Partial<Record<RoomElement, ElementChoice>>;
+  items: Partial<Record<LivingRoomItem, ItemDecision>>;
   notes: string;
-  variants: VariantCount;
 }
 
 export const INITIAL_DRAFT: WizardDraft = {
   photo: null,
-  roomType: null,
   style: null,
+  roomSizeInput: "",
   colorWorld: null,
+  atmosphere: null,
   budgetInput: "1500",
-  furniture: [],
-  elements: {},
+  items: {},
   notes: "",
-  variants: 2,
 };

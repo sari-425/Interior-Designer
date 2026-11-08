@@ -8,22 +8,22 @@ export function Hero() {
       <Container className="grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
         <div>
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.18em] text-sage-deep">
-            Raumgestaltung mit KI
+            Wohnzimmer-Planung mit KI
           </p>
           <h1 className="text-[2.6rem] leading-[1.08] sm:text-6xl">
-            Dein Raum.
+            Dein Zuhause.
             <br />
-            Dein Stil.
+            Dein Budget.
             <br />
-            <span className="text-taupe-deep">Dein Zuhause.</span>
+            <span className="text-taupe-deep">Dein Design.</span>
           </h1>
           <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-            Lade ein Foto deines Zimmers hoch, wähle deinen Lieblingsstil und dein Budget. ROOMORA zeigt dir, wie
-            dein Raum neu aussehen kann, und schlägt passende Einrichtung vor.
+            Lade ein Foto deines Wohnzimmers hoch, wähle Stil, Farben und dein Budget und lege fest, welche Möbel
+            bleiben. DesignBySari zeigt dir, wie dein Wohnzimmer neu aussehen kann.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
             <ButtonLink href="/gestalten" size="lg">
-              Jetzt Raum gestalten
+              Jetzt Wohnzimmer gestalten
             </ButtonLink>
             <ButtonLink href="/stile" variant="secondary" size="lg">
               Stile entdecken
