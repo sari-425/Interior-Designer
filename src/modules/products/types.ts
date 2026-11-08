@@ -20,6 +20,18 @@ const httpsUrl = z
 
 const isoDateTime = z.iso.datetime({ offset: true, error: "Preisstand muss ein Zeitpunkt (ISO 8601) sein." });
 
+export const AVAILABILITY_STATUSES = ["in_stock", "limited", "preorder", "out_of_stock"] as const;
+export type AvailabilityStatus = (typeof AVAILABILITY_STATUSES)[number];
+
+/** Prüfziffer nach GS1 (gilt für EAN-8, UPC-A/GTIN-12, EAN-13 und GTIN-14) */
+export function isValidGtin(value: string): boolean {
+  if (!/^(\d{8}|\d{12}|\d{13}|\d{14})$/.test(value)) return false;
+  const digits = value.split("").map(Number);
+  const check = digits.pop()!;
+  const sum = digits.reverse().reduce((acc, d, i) => acc + d * (i % 2 === 0 ? 3 : 1), 0);
+  return (10 - (sum % 10)) % 10 === check;
+}
+
 export const productSchema = z
   .object({
     id: z.string().min(1),
@@ -44,16 +56,53 @@ export const productSchema = z
     colors: z.array(z.string().trim().min(1)).max(10),
     imageUrl: httpsUrl.nullable(),
     productUrl: httpsUrl,
-    source: z.object({
-      type: z.enum(PRODUCT_SOURCE_TYPES),
-      name: z.string().trim().min(1),
-      fetchedAt: isoDateTime,
-    }),
+    source: z
+      .object({
+        type: z.enum(PRODUCT_SOURCE_TYPES),
+        name: z.string().trim().min(1),
+        /** Zeitpunkt, zu dem DesignBySari die Daten abgefragt hat */
+        fetchedAt: isoDateTime,
+        /** Zeitpunkt der letzten Aktualisierung durch die Quelle selbst (z. B. Feed-Datum), falls bekannt */
+        updatedAt: isoDateTime.optional(),
+      })
+      .strict(),
     affiliate: z.discriminatedUnion("isAffiliate", [
       z.object({ isAffiliate: z.literal(false) }),
       z.object({ isAffiliate: z.literal(true), network: z.string().trim().min(1) }),
     ]),
     category: z.string().trim().min(1),
+
+    // ----- Optionale Angaben: nur setzen, wenn die Quelle sie liefert. Fehlt ein Feld, ist der Wert unbekannt. -----
+
+    /** EAN/GTIN laut Quelle, mit gültiger Prüfziffer */
+    gtin: z.string().trim().refine(isValidGtin, "Ungültige EAN/GTIN.").optional(),
+    /** Versandkosten nach Deutschland in Cent laut Händler; 0 = versandkostenfrei */
+    shipping: z
+      .object({
+        costCents: z.number().int().nonnegative(),
+        currency: z.literal("EUR"),
+        asOf: isoDateTime,
+      })
+      .strict()
+      .optional(),
+    /** Lieferzeit in Werktagen laut Händler */
+    deliveryTime: z
+      .object({
+        minDays: z.number().int().nonnegative().max(365),
+        maxDays: z.number().int().nonnegative().max(365),
+        asOf: isoDateTime,
+      })
+      .strict()
+      .refine((d) => d.minDays <= d.maxDays, "Lieferzeit: minDays darf nicht größer als maxDays sein.")
+      .optional(),
+    /** Verfügbarkeit laut Händler zum angegebenen Zeitpunkt */
+    availability: z
+      .object({
+        status: z.enum(AVAILABILITY_STATUSES),
+        asOf: isoDateTime,
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

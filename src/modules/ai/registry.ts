@@ -1,6 +1,7 @@
 import { configuredProviderId, providerIdFor, type AiCapability, type Env } from "./config";
 import { AiNotConfiguredError } from "./errors";
 import type { DesignPlanningProvider, ImageGenerationProvider, RoomAnalysisProvider } from "./types";
+import { SHARED_USAGE_STORES, usageStoreStatus, type UsageStoreFactory } from "./usage-store";
 
 export { configuredProviderId };
 
@@ -36,11 +37,24 @@ function resolve<T>(capability: AiCapability, env: Env, factories: Readonly<Reco
 }
 
 /** true, wenn für alle drei Schritte ein eingetragener Anbieter konfiguriert ist */
-export function isAiEnabled(env: Env = process.env, registry: ProviderRegistry = PROVIDERS): boolean {
+export function areProvidersConfigured(env: Env = process.env, registry: ProviderRegistry = PROVIDERS): boolean {
   return (["analysis", "planning", "generation"] as const).every((capability) => {
     const id = providerIdFor(capability, env);
     return id !== null && id in registry[capability];
   });
+}
+
+/**
+ * true nur, wenn alle drei Anbieter konfiguriert sind UND ein verlässlicher
+ * Nutzungszähler aktiv ist (siehe usage-store.ts). Ohne Zähler keine KI,
+ * damit Kosten nie unkontrolliert entstehen.
+ */
+export function isAiEnabled(
+  env: Env = process.env,
+  registry: ProviderRegistry = PROVIDERS,
+  usageStores: Readonly<Record<string, UsageStoreFactory>> = SHARED_USAGE_STORES,
+): boolean {
+  return areProvidersConfigured(env, registry) && usageStoreStatus(env, usageStores).available;
 }
 
 /** Bildgenerierung (rückwärtskompatibel zu Phase 1b) */

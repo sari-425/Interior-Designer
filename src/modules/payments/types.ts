@@ -1,7 +1,8 @@
-import type { DesignPackage } from "@/modules/pricing/packages";
+import type { PaidPackageId } from "@/modules/pricing/packages";
 
 /**
  * Zahlungsablauf (geplant):
+ * Nur bezahlte Pakete (Basis, Plus) laufen über den Bezahlvorgang; die Vorschau ist kostenlos.
  * 1. Person wählt ein Paket → Server erstellt eine Stripe-Checkout-Sitzung
  *    (Preis kommt immer vom Server aus DESIGN_PACKAGES, nie aus dem Browser).
  * 2. Stripe leitet nach der Zahlung zurück.
@@ -9,7 +10,7 @@ import type { DesignPackage } from "@/modules/pricing/packages";
  */
 
 export interface CheckoutRequest {
-  packageId: DesignPackage["id"];
+  packageId: PaidPackageId;
   projectId: string;
   userId: string;
   /** Absolute URLs der eigenen Seite */
@@ -32,7 +33,7 @@ export interface PaymentProvider {
 export interface Entitlement {
   userId: string;
   projectId: string;
-  packageId: DesignPackage["id"];
+  packageId: PaidPackageId;
   paidAmountCents: number;
   paymentReference: string;
   grantedAt: string;

@@ -12,15 +12,16 @@ Stand: 2026-11-08
 | Produktquellen | Vertrag mit Händlern oder Affiliate-Netzwerk, zugelassene Schnittstelle | meist provisionsbasiert |
 | Stripe | Konto, Testschlüssel, Paket `stripe` oder REST-Anbindung, Webhook speichern | 1,5 % + 0,25 € je EU-Kartenzahlung |
 | Hosting | z. B. Vercel Pro (Hobby ist nicht kommerziell) | 20 $/Monat |
-| Gemeinsamer Zähler für Limits | Datenbank-Tabelle oder Redis, sobald mehrere Server laufen | abhängig vom Dienst |
+| Gemeinsamer Zähler für Limits | Pflicht vor jeder KI im Livebetrieb: Entwurf `supabase/migrations/20261108020000_ai_usage.sql` ausführen, `UsageStore` für Supabase umsetzen und in `SHARED_USAGE_STORES` eintragen | im Supabase-Plan enthalten |
 
 ## Bekannte Einschränkungen
 
 - Keine KI, keine Datenbank, keine Zahlungen aktiv. Die Website sagt das überall offen.
 - `isAiEnabled()` wird beim Build ausgewertet: Nach Änderung der KI-Konfiguration muss neu gebaut werden.
-- Die Limits der KI-Schicht zählen im Arbeitsspeicher eines Server-Prozesses. Für mehrere Instanzen ist ein gemeinsamer Speicher nötig (`UsageStore`).
+- Ohne gemeinsamen, dauerhaften Zähler (`AI_USAGE_STORE`) bleibt die KI aus, auch wenn Anbieter eingetragen sind. Der In-Memory-Zähler ist nur für lokale Tests mit `AI_ALLOW_IN_MEMORY_LIMITS=true` und nie im Produktionsmodus erlaubt.
 - Ohne Konten ist die Begrenzung pro Person an die IP-Adresse gebunden.
-- Fotos verlassen den Browser nicht; nach einem Neuladen der Seite ist der Entwurf weg.
+- Fotos verlassen den Browser nicht; sie werden dort verkleinert und ohne Metadaten vorbereitet. Nach einem Neuladen der Seite ist der Entwurf weg.
+- Der Designer erlaubt 1–4 Varianten, die Pakete sehen 2 (Basis) und 4 (Plus) vor. Die Auswahl im Designer wird beim Start der Pakete an das gebuchte Paket gekoppelt.
 - Rechtstexte (Impressum, Datenschutz, AGB) sind Entwürfe und müssen juristisch geprüft werden. Sie sind nicht in der Sitemap und nicht indexierbar.
 - `npm audit` meldet eine mittlere Schwachstelle in `minimatch` (nur ESLint, nicht in der Website), siehe [0001-stack.md](decisions/0001-stack.md).
 - Auf GitHub laufen keine automatischen Prüfungen (CI); getestet wird lokal.

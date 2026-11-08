@@ -9,6 +9,7 @@ export type AiErrorCode =
   | "budget_exceeded"
   | "provider_error"
   | "timeout"
+  | "invalid_output"
   | "invalid_input";
 
 export class AiError extends Error {
@@ -71,5 +72,19 @@ export class AiTimeoutError extends AiError {
       detail: `${step} hat ${timeoutMs} ms überschritten`,
     });
     this.name = "AiTimeoutError";
+  }
+}
+
+/**
+ * Die Antwort eines Anbieters passt nicht zum erwarteten Format oder hält
+ * Vorgaben wie das Budget nicht ein. Sie wird verworfen und nicht angezeigt.
+ */
+export class AiInvalidOutputError extends AiError {
+  constructor(providerId: string, detail: string) {
+    super("invalid_output", "Die Gestaltung hat kein brauchbares Ergebnis geliefert. Bitte versuche es erneut.", {
+      retryable: true,
+      detail: `[${providerId}] ${detail}`,
+    });
+    this.name = "AiInvalidOutputError";
   }
 }

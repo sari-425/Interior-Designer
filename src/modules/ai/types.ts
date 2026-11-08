@@ -58,7 +58,10 @@ export interface DesignPlanVariant {
   description: string;
   /** Anweisung für die Bild-KI (vom Planer erzeugt, Sprache je nach Anbieter) */
   imagePrompt: string;
-  /** Produktkategorien mit Budgetanteil, Grundlage für die spätere Produktsuche */
+  /**
+   * Produktkategorien mit Budgetanteil, Grundlage für die spätere Produktsuche.
+   * Die Summe darf das Budget der Anfrage nicht überschreiten (siehe output-schema.ts).
+   */
   shoppingList: { category: string; budgetEur: number }[];
 }
 
@@ -111,11 +114,15 @@ export interface DesignVariantResult {
   description: string;
   image: GeneratedImage;
   shoppingList: DesignPlanVariant["shoppingList"];
+  /** Summe der Budgetaufteilung in Euro, liegt immer innerhalb von `DesignResult.budgetEur` */
+  shoppingListTotalEur: number;
 }
 
 export interface DesignResult {
   variants: DesignVariantResult[];
   analysis: RoomAnalysis;
+  /** Budget der Anfrage in Euro, gegen das jede Variante geprüft wurde */
+  budgetEur: number;
   /** Summe der bekannten Kosten in US-Cent; null, wenn ein Anbieter keine Kosten meldet */
   costUsdCents: number | null;
   providers: { analysis: string; planning: string; generation: string };

@@ -11,13 +11,21 @@ import type {
   VariantCount,
 } from "@/modules/design-request/options";
 
+/**
+ * Raumfoto im Browser. `url`, `size`, `width` und `height` beschreiben die
+ * vorbereitete Kopie (verkleinert, JPEG, ohne Metadaten), die angezeigt und
+ * später übertragen wird. Das Original wird nicht aufbewahrt.
+ */
 export interface RoomPhoto {
-  /** Lokale Objekt-URL, nur in diesem Browser-Tab gültig */
+  /** Lokale Objekt-URL der vorbereiteten Kopie, nur in diesem Browser-Tab gültig */
   url: string;
+  /** Dateiname der vorbereiteten Kopie (immer .jpg) */
   name: string;
   size: number;
   width: number;
   height: number;
+  /** Angaben zum Original, nur zur Anzeige */
+  original: { name: string; size: number; width: number; height: number };
 }
 
 /** Zwischenstand des Wohnzimmer-Projekts während der Eingabe */

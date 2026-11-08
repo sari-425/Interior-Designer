@@ -2,6 +2,7 @@ import type { LivingRoomRequest } from "@/modules/design-request/schema";
 import { buildDesignBrief } from "./brief";
 import type { AiLimits } from "./config";
 import { AiError, AiProviderError, AiTimeoutError } from "./errors";
+import { parseDesignPlan, parseGeneratedImage, parseRoomAnalysis, shoppingListTotalCents } from "./output-schema";
 import type { UsageLimiter } from "./usage-limiter";
 import type {
   DesignPlanningProvider,
@@ -54,6 +55,8 @@ const sumCosts = (costs: (number | null)[]) =>
 /**
  * Wohnzimmer-Gestaltung in drei Schritten: Bildanalyse → Designplanung → Bildgenerierung.
  * Prüft vorher Limits und Kosten. Ruft nur die übergebenen Anbieter auf.
+ * Jede Anbieter-Antwort wird gegen ein Schema geprüft; die Budgetaufteilung
+ * jeder Variante muss innerhalb des Budgets der Anfrage liegen.
  */
 export async function createLivingRoomDesign(
   input: { request: LivingRoomRequest; photo: SourcePhoto; clientKey: string },
@@ -61,45 +64,60 @@ export async function createLivingRoomDesign(
 ): Promise<DesignResult> {
   const { request, photo, clientKey } = input;
   const estimate = estimateCostUsdCents(deps, request.variants);
-  deps.limiter.reserve(clientKey, estimate);
+  await deps.limiter.reserve(clientKey, estimate);
 
-  const analysis = await step("Bildanalyse", deps.analysis.id, deps.limits.timeoutMs, (signal) =>
-    deps.analysis.analyze({ photo, signal }),
-  );
+  // Kosten auch bei Fehlern buchen, soweit Anbieter sie gemeldet haben
+  const reported: (number | null)[] = [];
+  try {
+    const analysis = parseRoomAnalysis(
+      await step("Bildanalyse", deps.analysis.id, deps.limits.timeoutMs, (signal) => deps.analysis.analyze({ photo, signal })),
+      deps.analysis.id,
+    );
+    reported.push(analysis.costUsdCents);
 
-  const plan = await step("Designplanung", deps.planning.id, deps.limits.timeoutMs, (signal) =>
-    deps.planning.plan({ request, analysis, brief: buildDesignBrief(request), signal }),
-  );
-  if (plan.variants.length === 0) {
-    throw new AiProviderError(deps.planning.id, "Designplanung lieferte keine Varianten", true);
+    const rawPlan = await step("Designplanung", deps.planning.id, deps.limits.timeoutMs, (signal) =>
+      deps.planning.plan({ request, analysis, brief: buildDesignBrief(request), signal }),
+    );
+    reported.push(rawPlan && typeof rawPlan === "object" && "costUsdCents" in rawPlan ? toCost(rawPlan.costUsdCents) : null);
+    const plan = parseDesignPlan(rawPlan, request, deps.planning.id);
+    const variants = plan.variants.slice(0, request.variants);
+
+    const images = await Promise.all(
+      variants.map(async (variant) => {
+        const image = parseGeneratedImage(
+          await step("Bildgenerierung", deps.generation.id, deps.limits.timeoutMs, (signal) =>
+            deps.generation.generate({ photo, variant, request, signal }),
+          ),
+          deps.generation.id,
+        );
+        reported.push(image.costUsdCents);
+        return image;
+      }),
+    );
+
+    return {
+      analysis: {
+        detectedItems: analysis.detectedItems,
+        lighting: analysis.lighting,
+        description: analysis.description,
+        warnings: analysis.warnings,
+      },
+      budgetEur: request.budgetEur,
+      variants: variants.map((variant, i) => ({
+        title: variant.title,
+        description: variant.description,
+        shoppingList: variant.shoppingList,
+        shoppingListTotalEur: shoppingListTotalCents(variant.shoppingList) / 100,
+        image: { url: images[i].url, width: images[i].width, height: images[i].height, aiGenerated: true },
+      })),
+      costUsdCents: sumCosts(reported),
+      providers: { analysis: deps.analysis.id, planning: deps.planning.id, generation: deps.generation.id },
+    };
+  } finally {
+    await deps.limiter.recordActualCost(estimate, sumCosts(reported.length ? reported : [null]));
   }
-  const variants = plan.variants.slice(0, request.variants);
+}
 
-  const images = await Promise.all(
-    variants.map((variant) =>
-      step("Bildgenerierung", deps.generation.id, deps.limits.timeoutMs, (signal) =>
-        deps.generation.generate({ photo, variant, request, signal }),
-      ),
-    ),
-  );
-
-  const costUsdCents = sumCosts([analysis.costUsdCents, plan.costUsdCents, ...images.map((i) => i.costUsdCents)]);
-  deps.limiter.recordActualCost(estimate, costUsdCents);
-
-  return {
-    analysis: {
-      detectedItems: analysis.detectedItems,
-      lighting: analysis.lighting,
-      description: analysis.description,
-      warnings: analysis.warnings,
-    },
-    variants: variants.map((variant, i) => ({
-      title: variant.title,
-      description: variant.description,
-      shoppingList: variant.shoppingList,
-      image: { url: images[i].url, width: images[i].width, height: images[i].height, aiGenerated: true },
-    })),
-    costUsdCents,
-    providers: { analysis: deps.analysis.id, planning: deps.planning.id, generation: deps.generation.id },
-  };
+function toCost(value: unknown): number | null {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null;
 }

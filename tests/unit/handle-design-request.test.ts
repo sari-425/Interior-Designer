@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_AI_LIMITS } from "@/modules/ai/config";
 import { handleDesignRequest } from "@/modules/ai/handle-design-request";
 import type { ProviderRegistry } from "@/modules/ai/registry";
-import { UsageLimiter } from "@/modules/ai/usage-limiter";
+import { InMemoryUsageStore, UsageLimiter } from "@/modules/ai/usage-limiter";
 import { createPng } from "../e2e/helpers";
 import { fakeAnalysis, fakeGeneration, fakePlanning } from "./ai-fakes";
 
@@ -34,11 +34,15 @@ const png = (w = 800, h = 600) => {
   return { type: "image/png", size: bytes.length, bytes };
 };
 
+/** Lokaler Testbetrieb: Anbieter-Doubles und ausdrücklich freigegebener In-Memory-Zähler */
+const ENV = { AI_PROVIDER: "test", NODE_ENV: "test", AI_USAGE_STORE: "memory", AI_ALLOW_IN_MEMORY_LIMITS: "true" };
+
 function context(overrides: Partial<Parameters<typeof handleDesignRequest>[1]> = {}) {
+  const limiter = new UsageLimiter(DEFAULT_AI_LIMITS, new InMemoryUsageStore());
   return {
     clientKey: "1.2.3.4",
-    env: { AI_PROVIDER: "test" },
-    limiter: new UsageLimiter(DEFAULT_AI_LIMITS),
+    env: ENV,
+    getLimiter: () => limiter,
     limits: DEFAULT_AI_LIMITS,
     registry,
     ...overrides,
@@ -50,6 +54,17 @@ describe("POST /api/designs (Verarbeitung)", () => {
     const r = await handleDesignRequest({ requestJson: "{kaputt", photo: null }, context({ env: {}, registry: undefined }));
     expect(r.status).toBe(503);
     expect(r.body).toMatchObject({ ok: false, error: "ai_not_configured" });
+  });
+
+  it("antwortet ohne verlässlichen Nutzungszähler mit 503, auch wenn Anbieter eingerichtet sind", async () => {
+    let created = false;
+    const ctx = context({ env: { AI_PROVIDER: "test", NODE_ENV: "production", AI_USAGE_STORE: "memory", AI_ALLOW_IN_MEMORY_LIMITS: "true" } });
+    const r = await handleDesignRequest(
+      { requestJson: request, photo: png() },
+      { ...ctx, getLimiter: () => { created = true; return ctx.getLimiter(); } },
+    );
+    expect(r.status).toBe(503);
+    expect(created).toBe(false);
   });
 
   it("liefert mit eingerichteten Anbietern ein gekennzeichnetes Ergebnis", async () => {
@@ -83,7 +98,9 @@ describe("POST /api/designs (Verarbeitung)", () => {
   });
 
   it("begrenzt Anfragen mit 429 und Retry-After", async () => {
-    const ctx = context({ limits: { ...DEFAULT_AI_LIMITS, maxRequestsPerHourPerClient: 1 }, limiter: new UsageLimiter({ ...DEFAULT_AI_LIMITS, maxRequestsPerHourPerClient: 1 }) });
+    const limits = { ...DEFAULT_AI_LIMITS, maxRequestsPerHourPerClient: 1 };
+    const limiter = new UsageLimiter(limits, new InMemoryUsageStore());
+    const ctx = context({ limits, getLimiter: () => limiter });
     await handleDesignRequest({ requestJson: request, photo: png() }, ctx);
     const r = await handleDesignRequest({ requestJson: request, photo: png() }, ctx);
     expect(r.status).toBe(429);
@@ -98,5 +115,27 @@ describe("POST /api/designs (Verarbeitung)", () => {
     console.error = original;
     expect(r.status).toBe(502);
     expect(JSON.stringify(r.body)).not.toContain("geheim");
+  });
+
+  it("verwirft Planungen über Budget mit 502, ohne Details preiszugeben", async () => {
+    const tooExpensive: ProviderRegistry = {
+      ...registry,
+      planning: {
+        test: () =>
+          fakePlanning({
+            plan: async () => ({
+              variants: [{ title: "Teuer", description: "x", imagePrompt: "p", shoppingList: [{ category: "Sofa", budgetEur: 5000 }] }],
+              costUsdCents: 2,
+            }),
+          }),
+      },
+    };
+    const original = console.error;
+    console.error = () => {};
+    const r = await handleDesignRequest({ requestJson: request, photo: png() }, context({ registry: tooExpensive }));
+    console.error = original;
+    expect(r.status).toBe(502);
+    expect(r.body).toMatchObject({ ok: false, error: "invalid_output" });
+    expect(JSON.stringify(r.body)).not.toContain("5000");
   });
 });

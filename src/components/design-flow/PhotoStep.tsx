@@ -10,6 +10,7 @@ import {
   validateImageDimensions,
   validateImageFile,
 } from "@/lib/validation/image-upload";
+import { preparedFileName, prepareRoomPhoto } from "@/lib/image/prepare-upload";
 import type { RoomPhoto } from "./types";
 
 interface PhotoStepProps {
@@ -17,10 +18,10 @@ interface PhotoStepProps {
   onChange: (photo: RoomPhoto | null) => void;
 }
 
-function readDimensions(url: string): Promise<{ width: number; height: number }> {
+function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight });
+    img.onload = () => resolve(img);
     img.onerror = () => reject(new Error("Bild konnte nicht gelesen werden"));
     img.src = url;
   });
@@ -45,23 +46,47 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
         setError(fileCheck.error);
         return;
       }
-      const url = URL.createObjectURL(file);
-      let dims: { width: number; height: number };
+      // Das Original wird nur kurz zum Lesen geöffnet und danach wieder freigegeben
+      const originalUrl = URL.createObjectURL(file);
+      let image: HTMLImageElement;
       try {
-        dims = await readDimensions(url);
+        image = await loadImage(originalUrl);
       } catch {
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(originalUrl);
         setError("Das Bild konnte nicht gelesen werden. Bitte versuche ein anderes Foto.");
         return;
       }
-      const dimCheck = validateImageDimensions(dims.width, dims.height);
+      const original = { name: file.name, size: file.size, width: image.naturalWidth, height: image.naturalHeight };
+      const dimCheck = validateImageDimensions(original.width, original.height);
       if (!dimCheck.ok) {
-        URL.revokeObjectURL(url);
+        URL.revokeObjectURL(originalUrl);
         setError(dimCheck.error);
         return;
       }
+      let prepared: Awaited<ReturnType<typeof prepareRoomPhoto>>;
+      try {
+        // Verkleinern und Metadaten (EXIF, Standort) entfernen, alles lokal im Browser
+        prepared = await prepareRoomPhoto(image);
+      } catch {
+        setError("Das Foto konnte nicht vorbereitet werden. Bitte versuche ein anderes Foto.");
+        return;
+      } finally {
+        URL.revokeObjectURL(originalUrl);
+      }
+      const preparedCheck = validateImageDimensions(prepared.width, prepared.height);
+      if (!preparedCheck.ok) {
+        setError("Das Foto hat ein ungewöhnliches Seitenverhältnis. Bitte nutze ein normales Raumfoto im Quer- oder Hochformat.");
+        return;
+      }
       if (photo) URL.revokeObjectURL(photo.url);
-      onChange({ url, name: file.name, size: file.size, ...dims });
+      onChange({
+        url: URL.createObjectURL(prepared.blob),
+        name: preparedFileName(file.name),
+        size: prepared.blob.size,
+        width: prepared.width,
+        height: prepared.height,
+        original,
+      });
     } finally {
       setBusy(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -105,9 +130,15 @@ export function PhotoStep({ photo, onChange }: PhotoStepProps) {
             <img src={photo.url} alt="Vorschau deines Wohnzimmerfotos" className="aspect-[4/3] w-full object-cover" />
           </div>
           <div className="rounded-2xl border border-line bg-paper p-5">
-            <p className="font-medium break-all">{photo.name}</p>
+            <p className="font-medium break-all">{photo.original.name}</p>
             <p className="mt-1 text-sm text-muted">
               {photo.width} × {photo.height} Pixel · {formatBytes(photo.size)}
+            </p>
+            <p className="mt-2 text-sm text-muted" data-testid="photo-prepared">
+              {photo.width !== photo.original.width || photo.height !== photo.original.height
+                ? `Verkleinert von ${photo.original.width} × ${photo.original.height}. `
+                : ""}
+              Metadaten wie Standort und Aufnahmegerät wurden entfernt. Es bleibt auf deinem Gerät und wird erst übertragen, wenn du ein Design anforderst.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
               <label htmlFor={inputId} className="inline-flex min-h-11 cursor-pointer items-center rounded-full border border-charcoal/25 px-5 hover:border-charcoal">

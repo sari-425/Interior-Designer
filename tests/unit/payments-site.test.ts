@@ -37,6 +37,8 @@ describe("Zahlungen: Checkout", () => {
     expect((await startCheckout(req, provider, env)).url).toBe("https://pay.test/1990");
     await expect(startCheckout({ ...req, successUrl: "https://boese.test/ok" }, provider, env)).rejects.toBeInstanceOf(RangeError);
     await expect(startCheckout({ ...req, packageId: "gratis" as never }, provider, env)).rejects.toBeInstanceOf(RangeError);
+    await expect(startCheckout({ ...req, packageId: "vorschau" as never }, provider, env)).rejects.toThrow(/kostenlos/);
+    await expect(startCheckout({ ...req, packageId: "premium" as never }, provider, env)).rejects.toBeInstanceOf(RangeError);
   });
 });
 

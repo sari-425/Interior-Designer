@@ -1,4 +1,4 @@
-import { DESIGN_PACKAGES } from "@/modules/pricing/packages";
+import { DESIGN_PACKAGES, isPaidPackage } from "@/modules/pricing/packages";
 import { getPaymentsStatus } from "./config";
 import type { CheckoutRequest, CheckoutSession, PaymentProvider } from "./types";
 
@@ -26,6 +26,7 @@ export async function startCheckout(
   if (!provider) throw new PaymentsDisabledError("Kein Zahlungsanbieter eingerichtet.");
   const pkg = DESIGN_PACKAGES.find((p) => p.id === request.packageId);
   if (!pkg) throw new RangeError(`Unbekanntes Paket „${request.packageId}“.`);
+  if (!isPaidPackage(pkg)) throw new RangeError(`Das Paket „${pkg.name}“ ist kostenlos und braucht keinen Bezahlvorgang.`);
   for (const url of [request.successUrl, request.cancelUrl]) {
     const base = env.NEXT_PUBLIC_SITE_URL?.trim();
     if (!base || !url.startsWith(base)) throw new RangeError("Rücksprung-URLs müssen zur eigenen Seite gehören.");
@@ -33,6 +34,6 @@ export async function startCheckout(
   return provider.createCheckout({
     ...request,
     amountCents: pkg.priceCents,
-    description: `DesignBySari ${pkg.name} – ${pkg.features.join(", ")}`,
+    description: `DesignBySari ${pkg.name} – 1 Wohnzimmer, ${pkg.designVariants} Designvarianten`,
   });
 }

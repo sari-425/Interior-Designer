@@ -75,12 +75,12 @@ export function ResultPanel({ request, photo, aiEnabled }: ResultPanelProps) {
               <p className="mt-1 text-sm text-muted">im Stil {style.name}, als KI-Bild gekennzeichnet</p>
             </li>
             <li className="rounded-2xl bg-sand/40 p-4">
-              <p className="font-semibold">Vorher-Nachher-Vergleich</p>
-              <p className="mt-1 text-sm text-muted">mit deinem eigenen Foto</p>
+              <p className="font-semibold">Budgetaufteilung bis {euro(request.budgetEur)}</p>
+              <p className="mt-1 text-sm text-muted">je Variante nach Kategorien, geprüft gegen dein Budget</p>
             </li>
             <li className="rounded-2xl bg-sand/40 p-4">
-              <p className="font-semibold">Einkaufsliste bis {euro(request.budgetEur)}</p>
-              <p className="mt-1 text-sm text-muted">mit echten Produkten, ähnliche Alternativen klar markiert</p>
+              <p className="font-semibold">Echte Produkte folgen später</p>
+              <p className="mt-1 text-sm text-muted">Eine Einkaufsliste ist in Vorbereitung und noch nicht enthalten</p>
             </li>
           </ul>
           <Button className="mt-6" disabled aria-describedby="ergebnis-titel">

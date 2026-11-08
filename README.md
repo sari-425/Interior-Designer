@@ -12,6 +12,7 @@ DesignBySari ist eine deutschsprachige KI-Interior-Design-Plattform für Privatp
 | Wohnzimmer-Designer (Foto bis Zusammenfassung, Ergebnisansicht) | fertig und getestet |
 | KI (Bildanalyse, Designplanung, Bildgenerierung) | Architektur, Limits und Schnittstelle fertig, **kein Anbieter angebunden** |
 | Echte Produkte | Datenmodell, Prüfung und Suche fertig, **keine Produktquelle angebunden** |
+| Pakete | Vorschau (kostenlos, nutzbar), Basis 9,90 € und Plus 19,90 € (vorläufig, in Vorbereitung, nicht buchbar) |
 | Konten und Projekte | Schnittstellen, Prüfregeln und Datenbank-Entwurf fertig, **Supabase nicht eingerichtet** |
 | Zahlungen | Stripe vorbereitet und standardmäßig aus, **keine Zahlungen möglich** |
 
@@ -95,7 +96,7 @@ tests/unit, tests/e2e    Vitest und Playwright
 
 ## Der Wohnzimmer-Ablauf
 
-1. **Foto:** JPG, JPEG, PNG oder WebP, höchstens 10 MB, mindestens 640 × 480 Pixel, mit Vorschau.
+1. **Foto:** JPG, JPEG, PNG oder WebP, höchstens 10 MB, mindestens 640 × 480 Pixel, mit Vorschau. Das Foto wird im Browser auf höchstens 2048 Pixel verkleinert und ohne Metadaten (EXIF, Standort) als JPEG vorbereitet.
 2. **Stil:** Modern, Skandinavisch, Minimalistisch, Industrial, Japandi, Klassisch, Landhaus, Luxuriös.
 3. **Raum:** Raumgröße, Raummerkmale, Farben, Atmosphäre, Budget in Euro, besondere Anforderungen, Wünsche, Anzahl Designvarianten.
 4. **Möbel:** Möbel behalten oder ersetzen; Boden, Wände, Decke, Einbauten, Heizkörper behalten oder ändern.

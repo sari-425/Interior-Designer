@@ -19,13 +19,33 @@ test("Vorschauversion wird ehrlich gekennzeichnet", async ({ page }) => {
   await expect(page.getByText("In Vorbereitung", { exact: true }).first()).toBeVisible();
 
   await page.goto("/preise");
-  await expect(page.getByText("Paket noch nicht buchbar").first()).toBeVisible();
-  await expect(page.getByText("Geplant", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Paket noch nicht buchbar")).toHaveCount(2);
+  await expect(page.getByRole("main").getByText("In Vorbereitung", { exact: true })).toHaveCount(2);
+  await expect(page.getByRole("main").getByText("Jetzt verfügbar", { exact: true })).toHaveCount(1);
   await page.getByText("Kann ich DesignBySari schon nutzen?").click();
   await expect(page.getByText("Die KI-Gestaltung und die Designpakete sind noch in Vorbereitung.")).toBeVisible();
 
   await page.goto("/gestalten");
   await expect(page.getByText("deshalb wird noch kein Design erzeugt")).toBeVisible();
+});
+
+test("Preise zeigen nur Vorschau, Basis und Plus ohne falsche Versprechen", async ({ page }) => {
+  await page.goto("/preise");
+  const main = page.getByRole("main");
+  await expect(main.getByRole("heading", { level: 3 })).toHaveText(["Vorschau", "Basis", "Plus"]);
+  const card = (name: string) => main.locator("article", { has: page.getByRole("heading", { name, exact: true }) });
+  await expect(card("Vorschau")).toContainText("Kostenlos");
+  await expect(card("Vorschau")).toContainText("Jetzt verfügbar");
+  await expect(card("Basis")).toContainText(/9,90\s€einmalig, vorläufiger Preis/);
+  await expect(card("Basis")).toContainText("2 KI-Designvarianten");
+  await expect(card("Basis")).toContainText("Paket noch nicht buchbar");
+  await expect(card("Plus")).toContainText(/19,90\s€einmalig, vorläufiger Preis/);
+  await expect(card("Plus")).toContainText("4 KI-Designvarianten");
+  await expect(card("Plus")).toContainText("Paket noch nicht buchbar");
+  await expect(main.getByText(/Premium|49,90/)).toHaveCount(0);
+  // Einkaufsliste und Budgetplaner nur als „später geplant, nicht enthalten“
+  await expect(main.getByText("noch in keinem Paket enthalten: Einkaufsliste mit echten Produkten und Budgetplaner", { exact: false })).toBeVisible();
+  await expect(main.locator("article li", { hasText: /Einkaufsliste|Budgetplaner/ })).toHaveCount(0);
 });
 
 test("Vorher/Nachher-Regler ist per Tastatur bedienbar", async ({ page }) => {

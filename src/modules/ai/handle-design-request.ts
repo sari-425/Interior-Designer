@@ -10,6 +10,7 @@ import { AiError, AiNotConfiguredError, AiRateLimitError } from "./errors";
 import { createLivingRoomDesign } from "./pipeline";
 import { getAiProviders, isAiEnabled, PROVIDERS, type ProviderRegistry } from "./registry";
 import type { UsageLimiter } from "./usage-limiter";
+import type { UsageStoreFactory } from "./usage-store";
 import type { AiLimits } from "./config";
 import type { AcceptedImageMime, DesignResult } from "./types";
 
@@ -27,6 +28,12 @@ export type DesignResponse =
       headers?: Record<string, string>;
     };
 
+/** Antwort, solange KI-Anbieter oder verlässlicher Nutzungszähler fehlen */
+export function aiUnavailable(): DesignResponse {
+  const e = new AiNotConfiguredError();
+  return fail(503, e.code, e.userMessage);
+}
+
 const fail = (
   status: Exclude<DesignResponse["status"], 200>,
   error: string,
@@ -36,18 +43,24 @@ const fail = (
 
 /**
  * Serverseitige Verarbeitung einer Design-Anfrage, unabhängig von Next.js
- * und dadurch testbar. Reihenfolge: KI verfügbar? → Eingaben prüfen →
- * Foto prüfen → Limits/Kosten → Anbieter aufrufen.
+ * und dadurch testbar. Reihenfolge: KI verfügbar (Anbieter und verlässlicher
+ * Zähler)? → Eingaben prüfen → Foto prüfen → Limits/Kosten → Anbieter
+ * aufrufen → Antworten prüfen.
  */
 export async function handleDesignRequest(
   submission: DesignSubmission,
-  context: { clientKey: string; env: Env; limiter: UsageLimiter; limits: AiLimits; registry?: ProviderRegistry },
+  context: {
+    clientKey: string;
+    env: Env;
+    /** Wird erst erzeugt, wenn die KI verfügbar ist */
+    getLimiter: () => UsageLimiter;
+    limits: AiLimits;
+    registry?: ProviderRegistry;
+    usageStores?: Readonly<Record<string, UsageStoreFactory>>;
+  },
 ): Promise<DesignResponse> {
   const registry = context.registry ?? PROVIDERS;
-  if (!isAiEnabled(context.env, registry)) {
-    const e = new AiNotConfiguredError();
-    return fail(503, e.code, e.userMessage);
-  }
+  if (!isAiEnabled(context.env, registry, context.usageStores)) return aiUnavailable();
 
   let parsedJson: unknown = submission.requestJson;
   if (typeof parsedJson === "string") {
@@ -82,7 +95,7 @@ export async function handleDesignRequest(
         clientKey: context.clientKey,
         photo: { kind: "inline", bytes: photo.bytes, mimeType: photo.type as AcceptedImageMime, ...dims },
       },
-      { ...providers, limiter: context.limiter, limits: context.limits },
+      { ...providers, limiter: context.getLimiter(), limits: context.limits },
     );
     return { status: 200, body: { ok: true, result } };
   } catch (error) {

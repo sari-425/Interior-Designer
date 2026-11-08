@@ -1,8 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { AiNotConfiguredError } from "@/modules/ai/errors";
-import { configuredProviderId, getAiProviders, getImageProvider, isAiEnabled, requireEnv, type ProviderRegistry } from "@/modules/ai/registry";
+import {
+  areProvidersConfigured,
+  configuredProviderId,
+  getAiProviders,
+  getImageProvider,
+  isAiEnabled,
+  requireEnv,
+  type ProviderRegistry,
+} from "@/modules/ai/registry";
 import { providerIdFor, readAiLimits, DEFAULT_AI_LIMITS } from "@/modules/ai/config";
 import { fakeAnalysis, fakeGeneration, fakePlanning } from "./ai-fakes";
+
+/** Lokaler Testbetrieb mit ausdrücklich freigegebenem In-Memory-Zähler */
+const LOCAL_TEST_ENV = { NODE_ENV: "test", AI_USAGE_STORE: "memory", AI_ALLOW_IN_MEMORY_LIMITS: "true" };
 
 const registry: ProviderRegistry = {
   analysis: { test: () => fakeAnalysis() },
@@ -26,7 +37,8 @@ describe("KI-Anbieter-Verzeichnis", () => {
 
   it("wählt eingetragene Anbieter über Umgebungsvariablen", () => {
     expect(getImageProvider({ AI_PROVIDER: " Test " }, registry.generation).id).toBe("test-generation");
-    expect(isAiEnabled({ AI_PROVIDER: "test" }, registry)).toBe(true);
+    expect(areProvidersConfigured({ AI_PROVIDER: "test" }, registry)).toBe(true);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV }, registry)).toBe(true);
     const providers = getAiProviders({ AI_PROVIDER: "test" }, registry);
     expect(providers.planning.id).toBe("test-planning");
   });
@@ -35,7 +47,14 @@ describe("KI-Anbieter-Verzeichnis", () => {
     expect(providerIdFor("planning", { AI_PROVIDER: "test", AI_PLANNING_PROVIDER: "LLM" })).toBe("llm");
     expect(providerIdFor("analysis", { AI_PROVIDER: "test", AI_PLANNING_PROVIDER: "llm" })).toBe("test");
     expect(providerIdFor("generation", { AI_PROVIDER: "test", AI_IMAGE_PROVIDER: "disabled" })).toBeNull();
-    expect(isAiEnabled({ AI_PROVIDER: "test", AI_IMAGE_PROVIDER: "disabled" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", AI_IMAGE_PROVIDER: "disabled", ...LOCAL_TEST_ENV }, registry)).toBe(false);
+  });
+
+  it("bleibt ohne verlässlichen Nutzungszähler abgeschaltet, auch wenn alle Anbieter da sind", () => {
+    expect(isAiEnabled({ AI_PROVIDER: "test" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", AI_USAGE_STORE: "memory", NODE_ENV: "test" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV, NODE_ENV: "production" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV, AI_USAGE_STORE: "redis" }, registry)).toBe(false);
   });
 
   it("meldet fehlende Schlüssel verständlich", () => {

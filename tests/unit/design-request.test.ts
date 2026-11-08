@@ -9,12 +9,19 @@ import {
 import { INITIAL_DRAFT, type WizardDraft } from "@/components/design-flow/types";
 import { LIVING_ROOM_ITEMS } from "@/modules/design-request/options";
 import { livingRoomRequestSchema } from "@/modules/design-request/schema";
-import { DESIGN_PACKAGES, formatEuro } from "@/modules/pricing/packages";
+import { DESIGN_PACKAGES, formatEuro, PLANNED_LATER } from "@/modules/pricing/packages";
 import { DESIGN_STYLES } from "@/modules/styles/styles";
 
 const complete: WizardDraft = {
   ...INITIAL_DRAFT,
-  photo: { url: "blob:test", name: "wohnzimmer.jpg", size: 1000, width: 1600, height: 1200 },
+  photo: {
+    url: "blob:test",
+    name: "wohnzimmer.jpg",
+    size: 1000,
+    width: 1600,
+    height: 1200,
+    original: { name: "wohnzimmer.jpg", size: 2000, width: 1600, height: 1200 },
+  },
   style: "landhaus",
   roomSizeInput: "24,5",
   roomFeatures: ["Dachschräge", "Viel Tageslicht"],
@@ -229,11 +236,27 @@ describe("Konfiguration", () => {
     }
   });
 
-  it("enthält die drei vorläufigen Pakete mit den festgelegten Preisen", () => {
-    expect(DESIGN_PACKAGES.map((p) => formatEuro(p.priceCents).replace(/\s/g, " "))).toEqual([
-      "9,90 €",
-      "19,90 €",
-      "49,90 €",
+  it("enthält genau Vorschau, Basis und Plus mit den festgelegten Preisen", () => {
+    expect(DESIGN_PACKAGES.map((p) => [p.name, formatEuro(p.priceCents).replace(/\s/g, " ")])).toEqual([
+      ["Vorschau", "0,00 €"],
+      ["Basis", "9,90 €"],
+      ["Plus", "19,90 €"],
     ]);
+    expect(DESIGN_PACKAGES.map((p) => p.designVariants)).toEqual([0, 2, 4]);
+    expect(DESIGN_PACKAGES.every((p) => p.roomsPerProject === 1)).toBe(true);
+    expect(DESIGN_PACKAGES.some((p) => /premium/i.test(p.name))).toBe(false);
+  });
+
+  it("bewirbt nur funktionierende Leistungen als verfügbar", () => {
+    // Bezahlte Pakete sind noch nicht buchbar, ihre Leistungen sind in Vorbereitung
+    for (const pkg of DESIGN_PACKAGES.filter((p) => p.priceCents > 0)) {
+      expect(pkg.status).toBe("in_preparation");
+      expect(pkg.features.every((f) => f.status === "in_preparation")).toBe(true);
+      expect(pkg.features.map((f) => f.text)).toContain(`${pkg.designVariants} KI-Designvarianten`);
+    }
+    // Einkaufsliste und Budgetplaner sind noch nicht umgesetzt und in keinem Paket enthalten
+    const allFeatures = DESIGN_PACKAGES.flatMap((p) => p.features.map((f) => f.text)).join(" ");
+    expect(allFeatures).not.toMatch(/Einkaufsliste|Budget-?planer|Produkt/i);
+    expect(PLANNED_LATER).toEqual(["Einkaufsliste mit echten Produkten", "Budgetplaner"]);
   });
 });
