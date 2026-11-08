@@ -21,7 +21,9 @@ const complete: WizardDraft = {
   atmosphere: "gemuetlich",
   budgetInput: "1.500 €",
   items: { Sofa: "keep", Couchtisch: "keep", Fernseher: "keep", "TV-Möbel": "replace", Teppich: "replace", Sessel: "none" },
+  surfaces: { Bodenbelag: "keep", Wandfarbe: "change", Decke: "open" },
   notes: "  Mehr Stauraum  ",
+  variants: 3,
 };
 
 const validRequest = {
@@ -33,7 +35,10 @@ const validRequest = {
   budgetEur: 800,
   keep: [],
   replace: [],
+  keepSurfaces: [],
+  changeSurfaces: [],
   notes: "",
+  variants: 1,
 };
 
 describe("parseBudget", () => {
@@ -80,7 +85,10 @@ describe("toLivingRoomRequest", () => {
         budgetEur: 1500,
         keep: ["Sofa", "Couchtisch", "Fernseher"],
         replace: ["TV-Möbel", "Teppich"],
+        keepSurfaces: ["Bodenbelag"],
+        changeSurfaces: ["Wandfarbe"],
         notes: "Mehr Stauraum",
+        variants: 3,
       });
     }
   });
@@ -119,6 +127,22 @@ describe("livingRoomRequestSchema", () => {
     const r = livingRoomRequestSchema.safeParse({ ...validRequest, keep: ["Sofa"], replace: ["Sofa"] });
     expect(r.success).toBe(false);
     if (!r.success) expect(r.error.issues[0].message).toContain("Sofa");
+  });
+
+  it("verhindert, dass eine Oberfläche gleichzeitig bleibt und verändert wird", () => {
+    const r = livingRoomRequestSchema.safeParse({
+      ...validRequest,
+      keepSurfaces: ["Wandfarbe"],
+      changeSurfaces: ["Wandfarbe"],
+    });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(r.error.issues[0].message).toContain("Wandfarbe");
+  });
+
+  it("erlaubt nur 1 bis 4 Designvarianten", () => {
+    expect(livingRoomRequestSchema.safeParse({ ...validRequest, variants: 4 }).success).toBe(true);
+    expect(livingRoomRequestSchema.safeParse({ ...validRequest, variants: 0 }).success).toBe(false);
+    expect(livingRoomRequestSchema.safeParse({ ...validRequest, variants: 5 }).success).toBe(false);
   });
 
   it("lehnt doppelte und unbekannte Möbelstücke ab", () => {

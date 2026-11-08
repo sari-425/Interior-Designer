@@ -1,4 +1,4 @@
-import { LIVING_ROOM_ITEMS, type LivingRoomItem } from "@/modules/design-request/options";
+import { LIVING_ROOM_ITEMS, ROOM_SURFACES, type LivingRoomItem, type RoomSurface } from "@/modules/design-request/options";
 import { livingRoomRequestSchema, type LivingRoomRequest } from "@/modules/design-request/schema";
 import type { WizardDraft } from "./types";
 
@@ -26,6 +26,10 @@ export function itemsWith(draft: WizardDraft, decision: "keep" | "replace"): Liv
   return LIVING_ROOM_ITEMS.filter((item) => draft.items[item] === decision);
 }
 
+export function surfacesWith(draft: WizardDraft, decision: "keep" | "change"): RoomSurface[] {
+  return ROOM_SURFACES.filter((surface) => draft.surfaces[surface] === decision);
+}
+
 /** Erzeugt aus dem Entwurf eine geprüfte Wohnzimmer-Anfrage. */
 export function toLivingRoomRequest(draft: WizardDraft) {
   return livingRoomRequestSchema.safeParse({
@@ -37,15 +41,18 @@ export function toLivingRoomRequest(draft: WizardDraft) {
     budgetEur: parseBudget(draft.budgetInput) ?? undefined,
     keep: itemsWith(draft, "keep"),
     replace: itemsWith(draft, "replace"),
+    keepSurfaces: surfacesWith(draft, "keep"),
+    changeSurfaces: surfacesWith(draft, "change"),
     notes: draft.notes,
+    variants: draft.variants,
   } satisfies Record<keyof LivingRoomRequest, unknown>);
 }
 
 export type WizardStepId = "foto" | "stil" | "raum" | "moebel" | "uebersicht";
 
 const STEP_FIELDS: Partial<Record<WizardStepId, readonly (keyof LivingRoomRequest)[]>> = {
-  raum: ["roomSizeSqm", "colorWorld", "atmosphere", "budgetEur", "notes"],
-  moebel: ["keep", "replace"],
+  raum: ["roomSizeSqm", "colorWorld", "atmosphere", "budgetEur", "notes", "variants"],
+  moebel: ["keep", "replace", "keepSurfaces", "changeSurfaces"],
 };
 
 /** Prüft einen einzelnen Schritt und liefert eine verständliche Fehlermeldung. */

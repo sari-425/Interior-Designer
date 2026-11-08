@@ -9,6 +9,8 @@ import {
   NOTES_MAX,
   ROOM_SIZE_MAX,
   ROOM_SIZE_MIN,
+  ROOM_SURFACES,
+  VARIANT_COUNTS,
 } from "./options";
 
 const euro = (n: number) => `${n.toLocaleString("de-DE")} €`;
@@ -36,7 +38,12 @@ export const livingRoomRequestSchema = z
       .max(BUDGET_MAX, `Das Budget darf höchstens ${euro(BUDGET_MAX)} betragen.`),
     keep: z.array(z.enum(LIVING_ROOM_ITEMS)),
     replace: z.array(z.enum(LIVING_ROOM_ITEMS)),
+    keepSurfaces: z.array(z.enum(ROOM_SURFACES)),
+    changeSurfaces: z.array(z.enum(ROOM_SURFACES)),
     notes: z.string().trim().max(NOTES_MAX, `Bitte fasse deine Wünsche in höchstens ${NOTES_MAX} Zeichen zusammen.`),
+    variants: z
+      .number()
+      .refine((n) => (VARIANT_COUNTS as readonly number[]).includes(n), "Bitte wähle 1 bis 4 Designvarianten."),
   })
   .superRefine((value, ctx) => {
     const overlap = value.keep.find((item) => value.replace.includes(item));
@@ -45,6 +52,14 @@ export const livingRoomRequestSchema = z
         code: "custom",
         path: ["replace"],
         message: `„${overlap}“ kann nicht gleichzeitig behalten und ersetzt werden.`,
+      });
+    }
+    const surfaceOverlap = value.keepSurfaces.find((s) => value.changeSurfaces.includes(s));
+    if (surfaceOverlap) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["changeSurfaces"],
+        message: `„${surfaceOverlap}“ kann nicht gleichzeitig behalten und verändert werden.`,
       });
     }
     if (new Set(value.keep).size !== value.keep.length || new Set(value.replace).size !== value.replace.length) {

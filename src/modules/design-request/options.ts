@@ -48,6 +48,23 @@ export const ITEM_DECISIONS = [
 ] as const;
 export type ItemDecision = (typeof ITEM_DECISIONS)[number]["id"];
 
+/**
+ * Raum und Oberflächen (aus Phase 1 übernommen). „Vorhandene Möbel“ wird jetzt
+ * einzeln über LIVING_ROOM_ITEMS erfasst, „Beleuchtung“ ebenfalls dort.
+ */
+export const ROOM_SURFACES = ["Bodenbelag", "Wandfarbe", "Decke", "Einbauten (z. B. Schränke)", "Heizkörper"] as const;
+export type RoomSurface = (typeof ROOM_SURFACES)[number];
+
+export const SURFACE_DECISIONS = [
+  { id: "open", label: "Egal" },
+  { id: "keep", label: "Behalten" },
+  { id: "change", label: "Darf sich ändern" },
+] as const;
+export type SurfaceDecision = (typeof SURFACE_DECISIONS)[number]["id"];
+
+export const VARIANT_COUNTS = [1, 2, 3, 4] as const;
+export type VariantCount = (typeof VARIANT_COUNTS)[number];
+
 export const BUDGET_PRESETS = [500, 1000, 1500, 2500, 5000] as const;
 export const BUDGET_MIN = 100;
 export const BUDGET_MAX = 50_000;

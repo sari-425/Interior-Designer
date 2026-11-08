@@ -1,5 +1,13 @@
 import type { DesignStyleId } from "@/modules/styles/styles";
-import type { AtmosphereId, ColorWorldId, ItemDecision, LivingRoomItem } from "@/modules/design-request/options";
+import type {
+  AtmosphereId,
+  ColorWorldId,
+  ItemDecision,
+  LivingRoomItem,
+  RoomSurface,
+  SurfaceDecision,
+  VariantCount,
+} from "@/modules/design-request/options";
 
 export interface RoomPhoto {
   /** Lokale Objekt-URL, nur in diesem Browser-Tab gültig */
@@ -19,7 +27,9 @@ export interface WizardDraft {
   atmosphere: AtmosphereId | null;
   budgetInput: string;
   items: Partial<Record<LivingRoomItem, ItemDecision>>;
+  surfaces: Partial<Record<RoomSurface, SurfaceDecision>>;
   notes: string;
+  variants: VariantCount;
 }
 
 export const INITIAL_DRAFT: WizardDraft = {
@@ -30,5 +40,7 @@ export const INITIAL_DRAFT: WizardDraft = {
   atmosphere: null,
   budgetInput: "1500",
   items: {},
+  surfaces: {},
   notes: "",
+  variants: 2,
 };

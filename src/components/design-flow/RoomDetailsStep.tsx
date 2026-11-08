@@ -6,6 +6,7 @@ import {
   NOTES_MAX,
   ROOM_SIZE_MAX,
   ROOM_SIZE_MIN,
+  VARIANT_COUNTS,
 } from "@/modules/design-request/options";
 import { ChoiceCard, ToggleChip } from "./ChoiceCard";
 import { parseBudget } from "./draft";
@@ -145,6 +146,18 @@ export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
           {draft.notes.length} / {NOTES_MAX}
         </p>
       </div>
+
+      <fieldset>
+        <legend className="text-xl font-semibold">Wie viele Designvarianten?</legend>
+        <p className="mt-1 text-sm text-muted">So viele unterschiedliche Vorschläge möchtest du später sehen.</p>
+        <div className="mt-4 flex gap-2">
+          {VARIANT_COUNTS.map((n) => (
+            <ToggleChip key={n} checked={draft.variants === n} onChange={() => update({ variants: n })}>
+              <span className="min-w-6 text-center">{n}</span>
+            </ToggleChip>
+          ))}
+        </div>
+      </fieldset>
     </div>
   );
 }

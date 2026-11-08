@@ -21,13 +21,17 @@ create table if not exists public.living_room_projects (
   budget_eur    integer not null check (budget_eur between 100 and 50000),
   keep_items    text[] not null default '{}',
   replace_items text[] not null default '{}',
+  keep_surfaces   text[] not null default '{}',
+  change_surfaces text[] not null default '{}',
+  variant_count integer not null default 2 check (variant_count between 1 and 4),
   notes         text not null default '' check (char_length(notes) <= 500),
   photo_path    text,
   photo_width   integer,
   photo_height  integer,
   created_at    timestamptz not null default now(),
   updated_at    timestamptz not null default now(),
-  constraint keep_and_replace_disjoint check (not (keep_items && replace_items))
+  constraint keep_and_replace_disjoint check (not (keep_items && replace_items)),
+  constraint surfaces_disjoint check (not (keep_surfaces && change_surfaces))
 );
 
 create index if not exists living_room_projects_owner_idx

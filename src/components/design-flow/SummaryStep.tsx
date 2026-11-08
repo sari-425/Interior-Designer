@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import { ATMOSPHERES, COLOR_WORLDS } from "@/modules/design-request/options";
 import { getDesignStyle } from "@/modules/styles/styles";
-import { itemsWith, parseBudget, parseRoomSize, toLivingRoomRequest, type WizardStepId } from "./draft";
+import { itemsWith, parseBudget, parseRoomSize, surfacesWith, toLivingRoomRequest, type WizardStepId } from "./draft";
 import type { WizardDraft } from "./types";
 
 interface SummaryStepProps {
@@ -51,6 +51,8 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
   const budget = parseBudget(draft.budgetInput);
   const keep = itemsWith(draft, "keep");
   const replace = itemsWith(draft, "replace");
+  const keepSurfaces = surfacesWith(draft, "keep");
+  const changeSurfaces = surfacesWith(draft, "change");
   const none = "Keine Angabe";
 
   const roomRows: Row[] = [
@@ -65,10 +67,13 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
     { label: "Atmosphäre", value: ATMOSPHERES.find((a) => a.id === draft.atmosphere)?.name ?? none, step: "raum" },
     { label: "Budget", value: budget ? `bis ${budget.toLocaleString("de-DE")} €` : none, step: "raum" },
     { label: "Wünsche", value: draft.notes.trim() || none, step: "raum" },
+    { label: "Designvarianten", value: String(draft.variants), step: "raum" },
   ];
   const furnitureRows: Row[] = [
     { label: "Bleibt", value: keep.length ? keep.join(", ") : "Nichts ausgewählt", step: "moebel" },
     { label: "Wird ersetzt", value: replace.length ? replace.join(", ") : "Nichts ausgewählt", step: "moebel" },
+    { label: "Raum bleibt", value: keepSurfaces.length ? keepSurfaces.join(", ") : "Keine Vorgabe", step: "moebel" },
+    { label: "Raum darf sich ändern", value: changeSurfaces.length ? changeSurfaces.join(", ") : "Keine Vorgabe", step: "moebel" },
   ];
 
   return (
@@ -96,7 +101,7 @@ export function SummaryStep({ draft, goTo, onRestart }: SummaryStepProps) {
         </section>
         <div className="space-y-8">
           <SummaryList title="Raumangaben" rows={roomRows} goTo={goTo} />
-          <SummaryList title="Möbel" rows={furnitureRows} goTo={goTo} />
+          <SummaryList title="Möbel und Raum" rows={furnitureRows} goTo={goTo} />
         </div>
       </div>
 

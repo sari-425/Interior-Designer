@@ -8,7 +8,9 @@ Datum: 2026-11-08 · Status: angenommen
 - **Nur Wohnzimmer:** Der Schritt „Raumtyp“ entfällt. `roomType` ist im Schema fest `"wohnzimmer"`, damit weitere Räume später ohne Umbau ergänzt werden können.
 - **Stile:** Boho entfällt, Landhaus kommt hinzu, „Luxus“ heißt jetzt „Luxuriös“ (`luxurioes`).
 - **Möbel:** Statt getrennter Listen „Möbelwünsche“ und „Raumelemente“ gibt es eine Liste mit drei Zuständen je Möbelstück (Nicht vorhanden, Behalten, Ersetzen). So kann ein Möbelstück nie gleichzeitig behalten und ersetzt werden. Das Schema prüft es trotzdem zusätzlich.
-- **Anzahl Designvarianten** wurde aus dem Ablauf entfernt, weil sie im neuen Auftrag nicht vorkommt. Sie wird später über das gewählte Paket bestimmt.
+- **Raum und Oberflächen** aus Phase 1 bleiben erhalten (Bodenbelag, Wandfarbe, Decke, Einbauten, Heizkörper), jetzt mit drei Zuständen: Egal, Behalten, Darf sich ändern.
+- **Anzahl Designvarianten** (1 bis 4) aus Phase 1 bleibt erhalten und steht im Schritt „Raum“. Keine bestehende Funktion wurde entfernt; einzige bewusste Ausnahme ist die Raumtyp-Auswahl, weil der Start ausschließlich Wohnzimmer umfasst.
+- **Icon:** `src/app/icon.svg` zeigt die Marke im Browser-Tab. Die alte Standard-Datei `favicon.ico` von Next.js bleibt vorerst liegen, weil Dateien nur nach Freigabe gelöscht werden.
 - **Kein Absenden:** Ohne Datenbank und KI gibt es nichts, wohin das Projekt geschickt werden könnte. Die Zusammenfassung sagt das offen, statt eine Verarbeitung vorzutäuschen.
 
 ## Vorbereitet, nicht aktiv

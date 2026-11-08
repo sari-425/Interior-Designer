@@ -47,6 +47,7 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   await page.getByText("Gemütlich", { exact: true }).click();
   await page.getByText("2.500 €").click();
   await page.getByLabel("Sonstige Wünsche").fill("Mehr Stauraum");
+  await page.getByRole("group", { name: "Wie viele Designvarianten?" }).getByText("3", { exact: true }).click();
   await next(page).click();
 
   // Möbel behalten oder ersetzen
@@ -59,6 +60,9 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   }
   await expect(page.getByText("Bleibt (3)")).toBeVisible();
   await expect(page.getByText("Wird ersetzt (4)")).toBeVisible();
+  // Raum und Oberflächen
+  await page.getByRole("radiogroup", { name: "Bodenbelag", exact: true }).getByText("Behalten").click();
+  await page.getByRole("radiogroup", { name: "Wandfarbe", exact: true }).getByText("Darf sich ändern").click();
   await next(page).click();
 
   // Zusammenfassung
@@ -70,6 +74,9 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   }
   await expect(main.getByText("Sofa, Couchtisch, Fernseher", { exact: true })).toBeVisible();
   await expect(main.getByText("TV-Möbel, Teppich, Vorhänge, Beleuchtung", { exact: true })).toBeVisible();
+  await expect(main.getByText("Bodenbelag", { exact: true })).toBeVisible();
+  await expect(main.getByText("Wandfarbe", { exact: true })).toBeVisible();
+  await expect(main.getByText("3", { exact: true })).toBeVisible();
   await expect(page.getByText("Deine Angaben sind vollständig.")).toBeVisible();
   // Ehrlicher Hinweis statt vorgetäuschter Generierung
   await expect(page.getByText("noch nicht abgeschickt, gespeichert oder von einer KI bearbeitet")).toBeVisible();
