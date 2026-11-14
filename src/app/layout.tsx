@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import { PreviewBanner } from "@/components/layout/PreviewBanner";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { isSiteIndexable, SITE_NAME, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 // Schriften werden beim Build lokal eingebunden: Besucher laden nichts von Google-Servern.
@@ -21,7 +22,16 @@ export const metadata: Metadata = {
   },
   description:
     "Lade ein Foto deines Wohnzimmers hoch, wähle Stil, Farben und Budget und lege fest, welche Möbel bleiben. Wohnzimmer-Planung mit KI für Deutschland, derzeit als Vorschauversion.",
-  applicationName: "DesignBySari",
+  applicationName: SITE_NAME,
+  metadataBase: siteUrl(),
+  openGraph: {
+    type: "website",
+    locale: "de_DE",
+    siteName: SITE_NAME,
+  },
+  twitter: { card: "summary_large_image" },
+  robots: isSiteIndexable() ? { index: true, follow: true } : { index: false, follow: false },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {

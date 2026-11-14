@@ -1,4 +1,11 @@
-import { LIVING_ROOM_ITEMS, ROOM_SURFACES, type LivingRoomItem, type RoomSurface } from "@/modules/design-request/options";
+import {
+  LIVING_ROOM_ITEMS,
+  ROOM_FEATURES,
+  ROOM_SURFACES,
+  SPECIAL_REQUIREMENTS,
+  type LivingRoomItem,
+  type RoomSurface,
+} from "@/modules/design-request/options";
 import { livingRoomRequestSchema, type LivingRoomRequest } from "@/modules/design-request/schema";
 import type { WizardDraft } from "./types";
 
@@ -35,6 +42,7 @@ export function toLivingRoomRequest(draft: WizardDraft) {
   return livingRoomRequestSchema.safeParse({
     roomType: "wohnzimmer",
     roomSizeSqm: parseRoomSize(draft.roomSizeInput),
+    roomFeatures: ROOM_FEATURES.filter((f) => draft.roomFeatures.includes(f)),
     style: draft.style ?? undefined,
     colorWorld: draft.colorWorld ?? undefined,
     atmosphere: draft.atmosphere ?? undefined,
@@ -43,6 +51,7 @@ export function toLivingRoomRequest(draft: WizardDraft) {
     replace: itemsWith(draft, "replace"),
     keepSurfaces: surfacesWith(draft, "keep"),
     changeSurfaces: surfacesWith(draft, "change"),
+    requirements: SPECIAL_REQUIREMENTS.filter((r) => draft.requirements.includes(r)),
     notes: draft.notes,
     variants: draft.variants,
   } satisfies Record<keyof LivingRoomRequest, unknown>);
@@ -51,7 +60,7 @@ export function toLivingRoomRequest(draft: WizardDraft) {
 export type WizardStepId = "foto" | "stil" | "raum" | "moebel" | "uebersicht";
 
 const STEP_FIELDS: Partial<Record<WizardStepId, readonly (keyof LivingRoomRequest)[]>> = {
-  raum: ["roomSizeSqm", "colorWorld", "atmosphere", "budgetEur", "notes", "variants"],
+  raum: ["roomSizeSqm", "roomFeatures", "colorWorld", "atmosphere", "budgetEur", "requirements", "notes", "variants"],
   moebel: ["keep", "replace", "keepSurfaces", "changeSurfaces"],
 };
 

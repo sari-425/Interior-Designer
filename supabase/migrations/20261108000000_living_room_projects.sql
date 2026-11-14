@@ -11,6 +11,7 @@
 create table if not exists public.living_room_projects (
   id            uuid primary key default gen_random_uuid(),
   owner_id      uuid not null default auth.uid() references auth.users (id) on delete cascade,
+  title         text not null default 'Mein Wohnzimmer' check (char_length(title) between 1 and 80),
   status        text not null default 'draft'
                   check (status in ('draft', 'submitted', 'generating', 'completed', 'failed')),
   room_size_sqm numeric(5, 2) check (room_size_sqm is null or room_size_sqm between 5 and 200),
@@ -23,6 +24,8 @@ create table if not exists public.living_room_projects (
   replace_items text[] not null default '{}',
   keep_surfaces   text[] not null default '{}',
   change_surfaces text[] not null default '{}',
+  room_features text[] not null default '{}',
+  requirements  text[] not null default '{}',
   variant_count integer not null default 2 check (variant_count between 1 and 4),
   notes         text not null default '' check (char_length(notes) <= 500),
   photo_path    text,

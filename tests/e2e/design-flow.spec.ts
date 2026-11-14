@@ -41,6 +41,8 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   await next(page).click();
   await expect(alert(page)).toContainText("Farben");
   await page.getByLabel("Raumgröße").fill("24,5");
+  await page.getByText("Dachschräge", { exact: true }).click();
+  await page.getByText("Haustiere im Haushalt", { exact: true }).click();
   await page.getByText("Warm und erdig").click();
   await next(page).click();
   await expect(alert(page)).toContainText("Atmosphäre");
@@ -77,6 +79,19 @@ test("Kompletter Wohnzimmer-Ablauf bis zur Zusammenfassung", async ({ page }) =>
   await expect(main.getByText("Bodenbelag", { exact: true })).toBeVisible();
   await expect(main.getByText("Wandfarbe", { exact: true })).toBeVisible();
   await expect(main.getByText("3", { exact: true })).toBeVisible();
+  await expect(main.getByText("Dachschräge", { exact: true })).toBeVisible();
+  await expect(main.getByText("Haustiere im Haushalt", { exact: true })).toBeVisible();
+
+  // Ergebnisansicht: ehrlich, ohne KI-Aufruf und ohne Foto-Übertragung
+  const uploads: string[] = [];
+  page.on("request", (r) => r.method() === "POST" && uploads.push(r.url()));
+  await expect(page.getByRole("heading", { name: "Dein Ergebnis" })).toBeVisible();
+  await expect(page.getByText("KI-Gestaltung in Vorbereitung")).toBeVisible();
+  await expect(page.getByText("3 Designvarianten")).toBeVisible();
+  await expect(page.getByText("Budgetaufteilung bis 2.500 €")).toBeVisible();
+  await expect(page.getByText("Echte Produkte folgen später")).toBeVisible();
+  await expect(page.getByRole("button", { name: /Design erstellen/ })).toBeDisabled();
+  expect(uploads).toEqual([]);
   await expect(page.getByText("Deine Angaben sind vollständig.")).toBeVisible();
   // Ehrlicher Hinweis statt vorgetäuschter Generierung
   await expect(page.getByText("noch nicht abgeschickt, gespeichert oder von einer KI bearbeitet")).toBeVisible();
@@ -150,4 +165,91 @@ test("Zurück-Navigation behält alle Angaben", async ({ page }) => {
   await next(page).click();
   await next(page).click();
   await expect(page.getByRole("radio", { name: /Hell und luftig/ })).toBeChecked();
+});
+
+test("Widersprüchliche Raummerkmale werden erklärt", async ({ page }) => {
+  await uploadAndChooseStyle(page);
+  await page.getByText("Niedrige Decke", { exact: true }).click();
+  await page.getByText("Hohe Decke", { exact: true }).click();
+  await page.getByText("Hell und natürlich").click();
+  await page.getByText("Gemütlich", { exact: true }).click();
+  await next(page).click();
+  await expect(alert(page)).toContainText("entweder „Niedrige Decke“ oder „Hohe Decke“");
+  await page.getByText("Hohe Decke", { exact: true }).click();
+  await next(page).click();
+  await expect(page.getByRole("heading", { name: "Was bleibt, was kommt neu?" })).toBeVisible();
+});
+
+/** Erzeugt im Browser ein großes JPEG und fügt einen EXIF-Block mit Testmarke (Standortdaten-Ersatz) ein. */
+async function largeJpegWithExif(page: Page, width: number, height: number): Promise<Buffer> {
+  const bytes = await page.evaluate(
+    async ({ width, height }) => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      const gradient = ctx.createLinearGradient(0, 0, width, height);
+      gradient.addColorStop(0, "#F2EDE5");
+      gradient.addColorStop(1, "#777C6B");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = "#35352F";
+      ctx.fillRect(width * 0.1, height * 0.6, width * 0.5, height * 0.2);
+      const blob = await new Promise<Blob>((resolve) => canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.9));
+      const jpeg = new Uint8Array(await blob.arrayBuffer());
+      const text = new TextEncoder();
+      // TIFF-Kopf (Big Endian) mit leerem Verzeichnis, danach die Testmarke
+      const payload = new Uint8Array([
+        ...text.encode("Exif\0\0"),
+        0x4d, 0x4d, 0x00, 0x2a, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        ...text.encode("GPS-TESTMARKE 52.5200N 13.4050E"),
+      ]);
+      const length = payload.length + 2;
+      const app1 = new Uint8Array([0xff, 0xe1, length >> 8, length & 0xff, ...payload]);
+      return Array.from(new Uint8Array([...jpeg.slice(0, 2), ...app1, ...jpeg.slice(2)]));
+    },
+    { width, height },
+  );
+  return Buffer.from(bytes);
+}
+
+test("Große Fotos werden im Browser verkleinert und ohne Metadaten vorbereitet", async ({ page }) => {
+  const uploads: string[] = [];
+  page.on("request", (r) => {
+    if (r.method() !== "GET") uploads.push(r.url());
+  });
+  await page.goto("/gestalten");
+  const original = await largeJpegWithExif(page, 4000, 3000);
+  expect(original.includes(Buffer.from("GPS-TESTMARKE"))).toBe(true);
+
+  await page.locator('input[type="file"]').setInputFiles({ name: "IMG_0001.jpg", mimeType: "image/jpeg", buffer: original });
+  await expect(page.getByText("2048 × 1536 Pixel")).toBeVisible();
+  await expect(page.getByTestId("photo-prepared")).toContainText("Verkleinert von 4000 × 3000");
+  await expect(page.getByTestId("photo-prepared")).toContainText("Metadaten wie Standort");
+
+  const prepared = Buffer.from(
+    await page.getByAltText("Vorschau deines Wohnzimmerfotos").evaluate(async (img: HTMLImageElement) => {
+      const res = await fetch(img.src);
+      return Array.from(new Uint8Array(await res.arrayBuffer()));
+    }),
+  );
+  // JPEG, kleiner als das Original, ohne EXIF-Block und ohne Testmarke
+  expect(prepared.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]));
+  expect(prepared.includes(Buffer.from("Exif"))).toBe(false);
+  expect(prepared.includes(Buffer.from("GPS-TESTMARKE"))).toBe(false);
+  expect(prepared.length).toBeLessThanOrEqual(4 * 1024 * 1024);
+  const dims = await page.getByAltText("Vorschau deines Wohnzimmerfotos").evaluate((img: HTMLImageElement) => [img.naturalWidth, img.naturalHeight]);
+  expect(dims).toEqual([2048, 1536]);
+
+  // Hochformat bleibt Hochformat
+  await page.locator('input[type="file"]').setInputFiles({ name: "hoch.jpg", mimeType: "image/jpeg", buffer: await largeJpegWithExif(page, 3000, 4000) });
+  await expect(page.getByText("1536 × 2048 Pixel")).toBeVisible();
+
+  // Kleine Fotos werden nicht vergrößert
+  await page.locator('input[type="file"]').setInputFiles(photo(1200, 900, "klein-genug.png"));
+  await expect(page.getByText("1200 × 900 Pixel")).toBeVisible();
+  await expect(page.getByTestId("photo-prepared")).not.toContainText("Verkleinert");
+
+  // Nichts wurde übertragen
+  expect(uploads).toEqual([]);
 });

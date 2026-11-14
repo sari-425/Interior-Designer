@@ -1,11 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { AiNotConfiguredError, type ImageGenerationProvider } from "@/modules/ai/image-provider";
-import { configuredProviderId, getImageProvider, isAiEnabled } from "@/modules/ai/registry";
+import { AiNotConfiguredError } from "@/modules/ai/errors";
+import {
+  areProvidersConfigured,
+  configuredProviderId,
+  getAiProviders,
+  getImageProvider,
+  isAiEnabled,
+  requireEnv,
+  type ProviderRegistry,
+} from "@/modules/ai/registry";
+import { providerIdFor, readAiLimits, DEFAULT_AI_LIMITS } from "@/modules/ai/config";
+import { fakeAnalysis, fakeGeneration, fakePlanning } from "./ai-fakes";
 
-const fakeProvider: ImageGenerationProvider = {
-  id: "test",
-  displayName: "Test",
-  generate: async () => ({ status: "failed", providerId: "test", error: "nur Test", retryable: false }),
+/** Lokaler Testbetrieb mit ausdrücklich freigegebenem In-Memory-Zähler */
+const LOCAL_TEST_ENV = { NODE_ENV: "test", AI_USAGE_STORE: "memory", AI_ALLOW_IN_MEMORY_LIMITS: "true" };
+
+const registry: ProviderRegistry = {
+  analysis: { test: () => fakeAnalysis() },
+  planning: { test: () => fakePlanning(), llm: () => fakePlanning() },
+  generation: { test: () => fakeGeneration() },
 };
 
 describe("KI-Anbieter-Verzeichnis", () => {
@@ -19,10 +32,51 @@ describe("KI-Anbieter-Verzeichnis", () => {
   it("enthält derzeit keinen aktiven Anbieter", () => {
     expect(isAiEnabled({ AI_PROVIDER: "irgendwas" })).toBe(false);
     expect(() => getImageProvider({ AI_PROVIDER: "irgendwas" })).toThrow(/Unbekannter KI-Anbieter/);
+    expect(() => getAiProviders({ AI_PROVIDER: "test" })).toThrow(AiNotConfiguredError);
   });
 
-  it("wählt einen eingetragenen Anbieter über die Umgebungsvariable", () => {
-    const provider = getImageProvider({ AI_PROVIDER: " Test " }, { test: () => fakeProvider });
-    expect(provider.id).toBe("test");
+  it("wählt eingetragene Anbieter über Umgebungsvariablen", () => {
+    expect(getImageProvider({ AI_PROVIDER: " Test " }, registry.generation).id).toBe("test-generation");
+    expect(areProvidersConfigured({ AI_PROVIDER: "test" }, registry)).toBe(true);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV }, registry)).toBe(true);
+    const providers = getAiProviders({ AI_PROVIDER: "test" }, registry);
+    expect(providers.planning.id).toBe("test-planning");
+  });
+
+  it("erlaubt einen eigenen Anbieter je Schritt", () => {
+    expect(providerIdFor("planning", { AI_PROVIDER: "test", AI_PLANNING_PROVIDER: "LLM" })).toBe("llm");
+    expect(providerIdFor("analysis", { AI_PROVIDER: "test", AI_PLANNING_PROVIDER: "llm" })).toBe("test");
+    expect(providerIdFor("generation", { AI_PROVIDER: "test", AI_IMAGE_PROVIDER: "disabled" })).toBeNull();
+    expect(isAiEnabled({ AI_PROVIDER: "test", AI_IMAGE_PROVIDER: "disabled", ...LOCAL_TEST_ENV }, registry)).toBe(false);
+  });
+
+  it("bleibt ohne verlässlichen Nutzungszähler abgeschaltet, auch wenn alle Anbieter da sind", () => {
+    expect(isAiEnabled({ AI_PROVIDER: "test" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", AI_USAGE_STORE: "memory", NODE_ENV: "test" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV, NODE_ENV: "production" }, registry)).toBe(false);
+    expect(isAiEnabled({ AI_PROVIDER: "test", ...LOCAL_TEST_ENV, AI_USAGE_STORE: "redis" }, registry)).toBe(false);
+  });
+
+  it("meldet fehlende Schlüssel verständlich", () => {
+    expect(() => requireEnv({}, "EXAMPLE_API_KEY")).toThrow(/EXAMPLE_API_KEY fehlt/);
+    expect(requireEnv({ EXAMPLE_API_KEY: " abc " }, "EXAMPLE_API_KEY")).toBe("abc");
+  });
+});
+
+describe("KI-Limits", () => {
+  it("nutzt sichere Standardwerte", () => {
+    expect(readAiLimits({})).toEqual({ limits: DEFAULT_AI_LIMITS, warnings: [] });
+  });
+
+  it("übernimmt gültige Werte und verwirft ungültige", () => {
+    const { limits, warnings } = readAiLimits({
+      AI_MAX_DESIGNS_PER_DAY: "10",
+      AI_MAX_COST_USD_CENTS_PER_DAY: "-5",
+      AI_TIMEOUT_MS: "abc",
+    });
+    expect(limits.maxDesignsPerDay).toBe(10);
+    expect(limits.maxCostUsdCentsPerDay).toBe(DEFAULT_AI_LIMITS.maxCostUsdCentsPerDay);
+    expect(limits.timeoutMs).toBe(DEFAULT_AI_LIMITS.timeoutMs);
+    expect(warnings).toHaveLength(2);
   });
 });

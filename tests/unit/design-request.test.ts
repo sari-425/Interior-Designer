@@ -9,19 +9,28 @@ import {
 import { INITIAL_DRAFT, type WizardDraft } from "@/components/design-flow/types";
 import { LIVING_ROOM_ITEMS } from "@/modules/design-request/options";
 import { livingRoomRequestSchema } from "@/modules/design-request/schema";
-import { DESIGN_PACKAGES, formatEuro } from "@/modules/pricing/packages";
+import { DESIGN_PACKAGES, formatEuro, PLANNED_LATER } from "@/modules/pricing/packages";
 import { DESIGN_STYLES } from "@/modules/styles/styles";
 
 const complete: WizardDraft = {
   ...INITIAL_DRAFT,
-  photo: { url: "blob:test", name: "wohnzimmer.jpg", size: 1000, width: 1600, height: 1200 },
+  photo: {
+    url: "blob:test",
+    name: "wohnzimmer.jpg",
+    size: 1000,
+    width: 1600,
+    height: 1200,
+    original: { name: "wohnzimmer.jpg", size: 2000, width: 1600, height: 1200 },
+  },
   style: "landhaus",
   roomSizeInput: "24,5",
+  roomFeatures: ["Dachschräge", "Viel Tageslicht"],
   colorWorld: "warm-erdig",
   atmosphere: "gemuetlich",
   budgetInput: "1.500 €",
   items: { Sofa: "keep", Couchtisch: "keep", Fernseher: "keep", "TV-Möbel": "replace", Teppich: "replace", Sessel: "none" },
   surfaces: { Bodenbelag: "keep", Wandfarbe: "change", Decke: "open" },
+  requirements: ["Haustiere im Haushalt", "Kinderfreundlich"],
   notes: "  Mehr Stauraum  ",
   variants: 3,
 };
@@ -29,6 +38,7 @@ const complete: WizardDraft = {
 const validRequest = {
   roomType: "wohnzimmer",
   roomSizeSqm: null,
+  roomFeatures: [],
   style: "modern",
   colorWorld: "kuehl-hell",
   atmosphere: "ruhig",
@@ -37,6 +47,7 @@ const validRequest = {
   replace: [],
   keepSurfaces: [],
   changeSurfaces: [],
+  requirements: [],
   notes: "",
   variants: 1,
 };
@@ -79,6 +90,7 @@ describe("toLivingRoomRequest", () => {
       expect(r.data).toEqual({
         roomType: "wohnzimmer",
         roomSizeSqm: 24.5,
+        roomFeatures: ["Viel Tageslicht", "Dachschräge"],
         style: "landhaus",
         colorWorld: "warm-erdig",
         atmosphere: "gemuetlich",
@@ -87,6 +99,7 @@ describe("toLivingRoomRequest", () => {
         replace: ["TV-Möbel", "Teppich"],
         keepSurfaces: ["Bodenbelag"],
         changeSurfaces: ["Wandfarbe"],
+        requirements: ["Kinderfreundlich", "Haustiere im Haushalt"],
         notes: "Mehr Stauraum",
         variants: 3,
       });
@@ -137,6 +150,19 @@ describe("livingRoomRequestSchema", () => {
     });
     expect(r.success).toBe(false);
     if (!r.success) expect(r.error.issues[0].message).toContain("Wandfarbe");
+  });
+
+  it("prüft Raummerkmale und Anforderungen", () => {
+    const ok = { ...validRequest, roomFeatures: ["Kamin oder Ofen"], requirements: ["Viel Stauraum"] };
+    expect(livingRoomRequestSchema.safeParse(ok).success).toBe(true);
+    expect(livingRoomRequestSchema.safeParse({ ...validRequest, roomFeatures: ["Pool"] }).success).toBe(false);
+    expect(livingRoomRequestSchema.safeParse({ ...validRequest, requirements: ["Sauna"] }).success).toBe(false);
+    expect(
+      livingRoomRequestSchema.safeParse({ ...validRequest, roomFeatures: ["Kamin oder Ofen", "Kamin oder Ofen"] }).success,
+    ).toBe(false);
+    const both = livingRoomRequestSchema.safeParse({ ...validRequest, roomFeatures: ["Niedrige Decke", "Hohe Decke"] });
+    expect(both.success).toBe(false);
+    if (!both.success) expect(both.error.issues[0].message).toContain("entweder");
   });
 
   it("erlaubt nur 1 bis 4 Designvarianten", () => {
@@ -210,11 +236,27 @@ describe("Konfiguration", () => {
     }
   });
 
-  it("enthält die drei vorläufigen Pakete mit den festgelegten Preisen", () => {
-    expect(DESIGN_PACKAGES.map((p) => formatEuro(p.priceCents).replace(/\s/g, " "))).toEqual([
-      "9,90 €",
-      "19,90 €",
-      "49,90 €",
+  it("enthält genau Vorschau, Basis und Plus mit den festgelegten Preisen", () => {
+    expect(DESIGN_PACKAGES.map((p) => [p.name, formatEuro(p.priceCents).replace(/\s/g, " ")])).toEqual([
+      ["Vorschau", "0,00 €"],
+      ["Basis", "9,90 €"],
+      ["Plus", "19,90 €"],
     ]);
+    expect(DESIGN_PACKAGES.map((p) => p.designVariants)).toEqual([0, 2, 4]);
+    expect(DESIGN_PACKAGES.every((p) => p.roomsPerProject === 1)).toBe(true);
+    expect(DESIGN_PACKAGES.some((p) => /premium/i.test(p.name))).toBe(false);
+  });
+
+  it("bewirbt nur funktionierende Leistungen als verfügbar", () => {
+    // Bezahlte Pakete sind noch nicht buchbar, ihre Leistungen sind in Vorbereitung
+    for (const pkg of DESIGN_PACKAGES.filter((p) => p.priceCents > 0)) {
+      expect(pkg.status).toBe("in_preparation");
+      expect(pkg.features.every((f) => f.status === "in_preparation")).toBe(true);
+      expect(pkg.features.map((f) => f.text)).toContain(`${pkg.designVariants} KI-Designvarianten`);
+    }
+    // Einkaufsliste und Budgetplaner sind noch nicht umgesetzt und in keinem Paket enthalten
+    const allFeatures = DESIGN_PACKAGES.flatMap((p) => p.features.map((f) => f.text)).join(" ");
+    expect(allFeatures).not.toMatch(/Einkaufsliste|Budget-?planer|Produkt/i);
+    expect(PLANNED_LATER).toEqual(["Einkaufsliste mit echten Produkten", "Budgetplaner"]);
   });
 });

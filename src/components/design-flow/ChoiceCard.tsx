@@ -30,15 +30,24 @@ export function ChoiceCard({ selected, onSelect, children, name, value, classNam
   );
 }
 
-/** Kleiner Umschalter (Chip) für Mehrfachauswahl. */
-export function ToggleChip({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
+interface ToggleChipProps {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  children: ReactNode;
+  /** "radio" für Einfachauswahl (dann ist `name` Pflicht), sonst Mehrfachauswahl */
+  type?: "checkbox" | "radio";
+  name?: string;
+}
+
+/** Kleiner Umschalter (Chip) für Mehrfach- oder Einfachauswahl. */
+export function ToggleChip({ checked, onChange, children, type = "checkbox", name }: ToggleChipProps) {
   return (
     <label
       className={`inline-flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-[0.95rem] transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-charcoal ${
         checked ? "border-charcoal bg-charcoal text-cream" : "border-line bg-paper hover:border-taupe"
       }`}
     >
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only" />
+      <input type={type} name={name} checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only" />
       {children}
     </label>
   );

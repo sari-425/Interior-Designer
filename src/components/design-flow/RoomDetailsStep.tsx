@@ -4,8 +4,10 @@ import {
   BUDGET_PRESETS,
   COLOR_WORLDS,
   NOTES_MAX,
+  ROOM_FEATURES,
   ROOM_SIZE_MAX,
   ROOM_SIZE_MIN,
+  SPECIAL_REQUIREMENTS,
   VARIANT_COUNTS,
 } from "@/modules/design-request/options";
 import { ChoiceCard, ToggleChip } from "./ChoiceCard";
@@ -18,6 +20,11 @@ interface RoomDetailsStepProps {
 }
 
 const euro = (n: number) => `${n.toLocaleString("de-DE")} €`;
+
+/** Fügt einen Eintrag hinzu oder entfernt ihn (Mehrfachauswahl). */
+function toggled<T>(list: readonly T[], value: T, on: boolean): T[] {
+  return on ? (list.includes(value) ? [...list] : [...list, value]) : list.filter((v) => v !== value);
+}
 
 export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
   const sizeId = useId();
@@ -56,6 +63,24 @@ export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
           <span className="pr-4 text-muted">m²</span>
         </div>
       </div>
+
+      <fieldset>
+        <legend className="text-xl font-semibold">
+          Raummerkmale <span className="text-base font-normal text-muted">(optional)</span>
+        </legend>
+        <p className="mt-1 text-sm text-muted">Was zeichnet deinen Raum aus? Wähle alles, was zutrifft.</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {ROOM_FEATURES.map((feature) => (
+            <ToggleChip
+              key={feature}
+              checked={draft.roomFeatures.includes(feature)}
+              onChange={(on) => update({ roomFeatures: toggled(draft.roomFeatures, feature, on) })}
+            >
+              {feature}
+            </ToggleChip>
+          ))}
+        </div>
+      </fieldset>
 
       <fieldset>
         <legend className="text-xl font-semibold">Farben</legend>
@@ -106,7 +131,13 @@ export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
         <p className="mt-1 text-sm text-muted">Gesamtbetrag für neue Möbel und Deko in deinem Wohnzimmer.</p>
         <div className="mt-4 flex flex-wrap gap-2">
           {BUDGET_PRESETS.map((preset) => (
-            <ToggleChip key={preset} checked={budget === preset} onChange={() => update({ budgetInput: String(preset) })}>
+            <ToggleChip
+              key={preset}
+              type="radio"
+              name="budgetPreset"
+              checked={budget === preset}
+              onChange={() => update({ budgetInput: String(preset) })}
+            >
               {euro(preset)}
             </ToggleChip>
           ))}
@@ -126,6 +157,24 @@ export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
             />
             <span className="pr-4 text-muted">€</span>
           </div>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend className="text-xl font-semibold">
+          Besondere Anforderungen <span className="text-base font-normal text-muted">(optional)</span>
+        </legend>
+        <p className="mt-1 text-sm text-muted">Worauf soll die Einrichtung besonders Rücksicht nehmen?</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          {SPECIAL_REQUIREMENTS.map((req) => (
+            <ToggleChip
+              key={req}
+              checked={draft.requirements.includes(req)}
+              onChange={(on) => update({ requirements: toggled(draft.requirements, req, on) })}
+            >
+              {req}
+            </ToggleChip>
+          ))}
         </div>
       </fieldset>
 
@@ -152,7 +201,7 @@ export function RoomDetailsStep({ draft, update }: RoomDetailsStepProps) {
         <p className="mt-1 text-sm text-muted">So viele unterschiedliche Vorschläge möchtest du später sehen.</p>
         <div className="mt-4 flex gap-2">
           {VARIANT_COUNTS.map((n) => (
-            <ToggleChip key={n} checked={draft.variants === n} onChange={() => update({ variants: n })}>
+            <ToggleChip key={n} type="radio" name="variants" checked={draft.variants === n} onChange={() => update({ variants: n })}>
               <span className="min-w-6 text-center">{n}</span>
             </ToggleChip>
           ))}

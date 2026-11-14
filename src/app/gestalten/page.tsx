@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DesignWizard } from "@/components/design-flow/DesignWizard";
 import { Container } from "@/components/ui/Container";
+import { isAiEnabled } from "@/modules/ai/registry";
 
 export const metadata: Metadata = {
   title: "Wohnzimmer planen (Vorschau)",
@@ -18,7 +19,8 @@ export default function DesignPage() {
           Vorbereitung, deshalb wird noch kein Design erzeugt. Es entstehen keine Kosten.
         </p>
         <div className="mt-10">
-          <DesignWizard />
+          {/* Wird beim Build ausgewertet; nach Änderung der KI-Konfiguration neu bauen */}
+          <DesignWizard aiEnabled={isAiEnabled()} />
         </div>
       </Container>
     </section>

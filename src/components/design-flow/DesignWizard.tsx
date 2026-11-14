@@ -18,7 +18,7 @@ const STEPS: { id: WizardStepId; label: string }[] = [
   { id: "uebersicht", label: "Übersicht" },
 ];
 
-export function DesignWizard() {
+export function DesignWizard({ aiEnabled = false }: { aiEnabled?: boolean }) {
   const [draft, setDraft] = useState<WizardDraft>(INITIAL_DRAFT);
   const [index, setIndex] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -119,7 +119,7 @@ export function DesignWizard() {
         {step.id === "stil" && <StyleStep value={draft.style} onChange={(style) => update({ style })} />}
         {step.id === "raum" && <RoomDetailsStep draft={draft} update={update} />}
         {step.id === "moebel" && <FurnitureStep draft={draft} update={update} />}
-        {step.id === "uebersicht" && <SummaryStep draft={draft} goTo={goTo} onRestart={restart} />}
+        {step.id === "uebersicht" && <SummaryStep draft={draft} goTo={goTo} onRestart={restart} aiEnabled={aiEnabled} />}
       </div>
 
       {error && (
