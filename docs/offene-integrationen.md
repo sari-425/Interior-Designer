@@ -22,7 +22,7 @@ Stand: 2026-11-08
 - Ohne Konten ist die Begrenzung pro Person an die IP-Adresse gebunden.
 - Fotos verlassen den Browser nicht; sie werden dort verkleinert und ohne Metadaten vorbereitet. Nach einem Neuladen der Seite ist der Entwurf weg.
 - Der Designer erlaubt 1–4 Varianten, die Pakete sehen 2 (Basis) und 4 (Plus) vor. Die Auswahl im Designer wird beim Start der Pakete an das gebuchte Paket gekoppelt.
-- Rechtstexte (Impressum, Datenschutz, AGB) sind Entwürfe und müssen juristisch geprüft werden. Sie sind nicht in der Sitemap und nicht indexierbar.
+- Rechtstexte (Impressum, Datenschutz, AGB, Widerruf) sind Entwürfe mit markierten Platzhaltern und müssen juristisch geprüft werden. Sie sind nicht in der Sitemap und nicht indexierbar.
 - `npm audit` meldet eine mittlere Schwachstelle in `minimatch` (nur ESLint, nicht in der Website), siehe [0001-stack.md](decisions/0001-stack.md).
 - Auf GitHub laufen keine automatischen Prüfungen (CI); getestet wird lokal.
 
@@ -32,6 +32,6 @@ Stand: 2026-11-08
 2. Supabase einrichten, Konten, Projektspeicher und Foto-Upload umsetzen.
 3. Produktquelle vertraglich sichern und anbinden.
 4. Stripe im Testmodus anbinden, danach Livebetrieb freigeben.
-5. Rechtstexte prüfen lassen (Impressum, Datenschutz inkl. KI-Verarbeitung, AGB, Widerruf).
+5. Rechtstexte ausfüllen und prüfen lassen (Impressum, Datenschutz inkl. KI-Verarbeitung, AGB, Widerruf), Widerrufsfunktion umsetzen, siehe [rechtstexte-ausfuellen.md](rechtstexte-ausfuellen.md).
 6. Hosting mit eigener Domain, `NEXT_PUBLIC_SITE_URL` und `SITE_INDEXABLE=true`.
 7. CI auf GitHub einrichten, Monitoring und Fehlerprotokolle.
