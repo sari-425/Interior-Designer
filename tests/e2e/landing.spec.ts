@@ -63,6 +63,7 @@ test("Alle Seiten und Rechtsseiten sind erreichbar", async ({ page }) => {
     ["/impressum", "Impressum"],
     ["/datenschutz", "Datenschutzerklärung"],
     ["/agb", "Allgemeine Geschäftsbedingungen"],
+    ["/widerruf", "Widerrufsbelehrung"],
     ["/transparenz", "KI und Partnerlinks"],
   ] as const) {
     const res = await page.goto(path);

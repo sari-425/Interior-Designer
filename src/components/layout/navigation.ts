@@ -8,5 +8,6 @@ export const LEGAL_NAV = [
   { href: "/impressum", label: "Impressum" },
   { href: "/datenschutz", label: "Datenschutz" },
   { href: "/agb", label: "AGB" },
+  { href: "/widerruf", label: "Widerruf" },
   { href: "/transparenz", label: "KI und Partnerlinks" },
 ] as const;
